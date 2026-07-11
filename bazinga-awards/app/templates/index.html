@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="stage">
+  <div class="curtain curtain-left"></div>
+  <div class="curtain curtain-right"></div>
+  <div class="spotlight"></div>
+
+  <main class="stage-content">
+    {% if person %}
+      <span class="eyebrow">conta conectada</span>
+      {% if person.photo_url %}
+        <img class="avatar" src="{{ person.photo_url }}" alt="{{ person.name }}">
+      {% endif %}
+      <h1 class="wordmark">Fala, {{ person.name }}</h1>
+      <p class="tagline">Login funcionando. Categorias e votação entram na próxima fase.</p>
+      {% if person.is_admin %}<span class="admin-flag">admin</span>{% endif %}
+      <div class="login-row">
+        <a class="btn btn-ghost" href="{{ url_for('auth.logout') }}">Sair</a>
+      </div>
+    {% else %}
+      <span class="eyebrow">temporada 2026</span>
+      <h1 class="wordmark">Bazinga Awards</h1>
+      <p class="tagline">A premiação oficial do servidor. Vote, discuta, dispute o troféu.</p>
+      <div class="login-row">
+        <a class="btn btn-google" href="{{ url_for('auth.login', provider='google') }}">
+          Entrar com Google
+        </a>
+        <a class="btn btn-discord" href="{{ url_for('auth.login', provider='discord') }}">
+          Entrar com Discord
+        </a>
+      </div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

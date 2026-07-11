@@ -1,0 +1,211 @@
+:root {
+  --stage-black: #0b0b10;
+  --velvet: #3d0f1f;
+  --velvet-shadow: #1a0a10;
+  --gold: #d4af37;
+  --gold-bright: #f0cf6b;
+  --cream: #f5efe0;
+  --slate: #a8a6b3;
+
+  --font-display: "Fraunces", serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--stage-black);
+  color: var(--cream);
+  font-family: var(--font-body);
+}
+
+.stage {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spotlight {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 35%, rgba(212, 175, 55, 0.16), transparent 70%),
+    radial-gradient(ellipse 80% 60% at 50% 100%, rgba(61, 15, 31, 0.6), transparent 70%);
+  pointer-events: none;
+}
+
+.curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 52%;
+  background: linear-gradient(120deg, var(--velvet-shadow), var(--velvet) 45%, var(--velvet-shadow));
+  z-index: 5;
+  box-shadow: 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+.curtain-left {
+  left: 0;
+  animation: open-left 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+}
+
+.curtain-right {
+  right: 0;
+  animation: open-right 1.4s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards;
+}
+
+@keyframes open-left {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes open-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curtain-left,
+  .curtain-right {
+    display: none;
+  }
+}
+
+.stage-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  max-width: 640px;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.25rem;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-style: italic;
+  font-size: clamp(2.75rem, 8vw, 5rem);
+  line-height: 1.05;
+  margin: 0 0 1rem;
+  color: var(--cream);
+}
+
+.tagline {
+  color: var(--slate);
+  font-size: 1.05rem;
+  margin: 0 auto 2.5rem;
+  max-width: 34ch;
+}
+
+.login-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+}
+
+.btn-google {
+  background: var(--cream);
+  color: var(--stage-black);
+}
+
+.btn-google:hover {
+  box-shadow: 0 8px 24px rgba(245, 239, 224, 0.15);
+}
+
+.btn-discord {
+  background: transparent;
+  color: var(--cream);
+  border-color: rgba(245, 239, 224, 0.35);
+}
+
+.btn-discord:hover {
+  border-color: var(--gold);
+  box-shadow: 0 8px 24px rgba(212, 175, 55, 0.15);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--slate);
+  border-color: rgba(168, 166, 179, 0.3);
+  font-size: 0.85rem;
+  padding: 0.6rem 1.4rem;
+}
+
+.btn-ghost:hover {
+  color: var(--cream);
+  border-color: var(--cream);
+}
+
+.avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  margin-bottom: 1.25rem;
+  object-fit: cover;
+}
+
+.admin-flag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--stage-black);
+  background: var(--gold);
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  margin: 0 0 1.5rem;
+}
+
+@media (max-width: 480px) {
+  .login-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
