@@ -1,0 +1,14 @@
+# Senhas e Chaves
+.env
+
+# Bancos de Dados
+*.db
+instance/
+
+# Cache do Python
+__pycache__/
+*.pyc
+
+# Ambientes Virtuais
+venv/
+.venv/

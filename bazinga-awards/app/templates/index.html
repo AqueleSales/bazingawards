@@ -1,29 +1,146 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<style>
+  /* Animações e Estilos Premium (GOTY Style) - Sem alterar seu style.css */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .voting-container {
+    animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    width: 100%;
+    max-width: 1000px;
+    margin: 4rem auto 0 auto;
+    text-align: left;
+    padding: 0 1rem;
+  }
+
+  .category-block {
+    margin-bottom: 5rem;
+  }
+
+  .category-title {
+    font-family: 'Fraunces', serif;
+    font-size: 2.2rem;
+    color: #ffffff;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .category-desc {
+    font-family: 'Inter', sans-serif;
+    color: #888888;
+    font-size: 0.95rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .nominees-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 2.5rem;
+  }
+
+  .nominee-card {
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  /* O anel ao redor da foto */
+  .img-ring {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 1.2rem;
+    border-radius: 50%;
+    padding: 4px; /* Espaço para o anel de seleção */
+    background: transparent;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Efeito Hover na foto inteira */
+  .nominee-card:hover .img-ring {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Estilo da foto em si */
+  .nominee-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #111;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: border-color 0.4s ease;
+  }
+
+  /* Nome do Indicado */
+  .nominee-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #cccccc;
+    text-align: center;
+    transition: color 0.3s ease;
+  }
+
+  /* --- ESTADOS DE SELEÇÃO --- */
+  .nominee-card.selecionado .img-ring {
+    background: linear-gradient(135deg, #FFD700, #b89600); /* Dourado Premium */
+    transform: translateY(-8px);
+  }
+
+  .nominee-card.selecionado .nominee-img {
+    border-color: #050508; /* Contraste com o anel */
+  }
+
+  .nominee-card.selecionado .nominee-name {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  /* Ícone de Check elegante */
+  .check-icon {
+    opacity: 0;
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: #FFD700;
+    color: #050508;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #050508;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: scale(0.5);
+  }
+
+  .nominee-card.selecionado .check-icon {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+</style>
+
 <div class="stage">
   <div class="curtain curtain-left"></div>
   <div class="curtain curtain-right"></div>
   <div class="spotlight"></div>
 
   <main class="stage-content">
-    {% if person %}
-      <span class="eyebrow">conta conectada</span>
-      {% if person.photo_url %}
-        <img class="avatar" src="{{ person.photo_url }}" alt="{{ person.name }}">
-      {% endif %}
-      <h1 class="wordmark">Fala, {{ person.name }}</h1>
-      <p class="tagline">Login funcionando. Categorias e votação entram na próxima fase.</p>
-
-      {% if person.is_admin %}
-        <a href="{{ url_for('admin.dashboard') }}" class="admin-flag" style="cursor: pointer; text-decoration: none;">admin</a>
-      {% endif %}
-
-      <div class="login-row">
-        <a class="btn btn-ghost" href="{{ url_for('auth.logout') }}">Sair</a>
-      </div>
-    {% else %}
-      <span class="eyebrow">temporada 2026</span>
+    {% if not user %}
+      <span class="eyebrow">temporada {{ edicao.year if edicao else '2026' }}</span>
       <h1 class="wordmark">Bazinga Awards</h1>
       <p class="tagline">A premiação oficial do servidor. Vote, discuta, dispute o troféu.</p>
       <div class="login-row">
@@ -34,6 +151,118 @@
           Entrar com Discord
         </a>
       </div>
+
+    {% else %}
+      <span class="eyebrow">conta conectada</span>
+      {% if user.photo_url %}
+        <img class="avatar" src="{{ user.photo_url }}" alt="{{ user.name }}">
+      {% endif %}
+      <h1 class="wordmark" style="font-size: 3rem; margin-bottom: 0.5rem;">Fala, {{ user.name }}</h1>
+
+      {% if status_real == 'ANNOUNCED' %}
+        <p class="tagline">A paciência é uma virtude. A votação da temporada {{ edicao.year }} ainda não começou.</p>
+        {% if edicao.voting_start %}
+          <p class="tagline" style="color: #FFD700; font-family: 'JetBrains Mono', monospace; margin-top: 1rem; font-size: 0.9rem;">
+            ABERTURA: {{ edicao.voting_start.strftime('%d/%m/%Y às %H:%M') }}
+          </p>
+        {% endif %}
+
+      {% elif status_real == 'CLOSED' %}
+        <p class="tagline">Votações Encerradas. As urnas foram fechadas e os votos estão sob auditoria.</p>
+        {% if edicao.presentation_date %}
+          <p class="tagline" style="color: #FFD700; font-family: 'JetBrains Mono', monospace; margin-top: 1rem; font-size: 0.9rem;">
+            CERIMÔNIA OFICIAL: {{ edicao.presentation_date.strftime('%d/%m/%Y às %H:%M') }}
+          </p>
+        {% endif %}
+
+      {% elif status_real == 'REVEALING' %}
+        <p class="tagline">O Grande Dia Chegou. A revelação dos vencedores já está disponível para visualização.</p>
+        <div class="login-row" style="margin-top: 2rem;">
+            <a class="btn" style="background-color: #FFD700; color: #000; font-family: 'Inter', sans-serif; font-weight: 600; border: none;" href="#">
+              Acompanhar Cerimônia
+            </a>
+        </div>
+
+      {% elif status_real == 'VOTING' %}
+        <p class="tagline">As urnas estão abertas. Clique no retrato para registrar seu voto anonimamente.</p>
+
+        <div class="voting-container">
+            {% for cat in categorias %}
+            <div class="category-block">
+                <h2 class="category-title">{{ cat.name }}</h2>
+                <p class="category-desc">{{ cat.description }}</p>
+
+                <div class="nominees-grid">
+                    {% for pessoa in indicados[cat.id] %}
+                    {% set is_voted = (meus_votos.get(cat.id) == pessoa.id) %}
+
+                    <div onclick="registrarVoto({{ cat.id }}, {{ pessoa.id }}, this)"
+                         class="nominee-card {% if is_voted %}selecionado{% endif %}">
+
+                        <div class="img-ring">
+                            {% if pessoa.photo_url %}
+                                <img src="{{ pessoa.photo_url }}" class="nominee-img">
+                            {% else %}
+                                <div class="nominee-img" style="display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 2rem; color: #fff;">
+                                    {{ pessoa.name[0] | upper }}
+                                </div>
+                            {% endif %}
+
+                            <div class="check-icon">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <span class="nominee-name">{{ pessoa.name }}</span>
+                    </div>
+                    {% else %}
+                    <p style="color: #555; font-family: 'Inter', sans-serif; font-style: italic; font-size: 0.9rem;">Lista de indicados em segredo.</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <script>
+            function registrarVoto(categoriaId, nomineeId, cardClicado) {
+                // Seleciona a div 'category-block' pai para limpar apenas os indicados daquela categoria
+                const containerCategoria = cardClicado.closest('.category-block');
+                const todosOsCards = containerCategoria.querySelectorAll('.nominee-card');
+
+                // Remove a classe 'selecionado' de todos
+                todosOsCards.forEach(card => {
+                    card.classList.remove('selecionado');
+                });
+
+                // Aplica a classe 'selecionado' no card clicado (o CSS cuida da animação)
+                cardClicado.classList.add('selecionado');
+
+                // Envia o voto silenciosamente para o Python
+                fetch('/votar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ categoria_id: categoriaId, nominee_id: nomineeId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(!data.success) {
+                        alert("Não foi possível registrar o voto. Tente novamente.");
+                    }
+                })
+                .catch(error => console.error('Erro de rede:', error));
+            }
+        </script>
+      {% endif %}
+
+      <div class="login-row" style="margin-top: 3rem;">
+        {% if user.is_admin %}
+          <a href="{{ url_for('admin.dashboard') }}" class="admin-flag" style="cursor: pointer; text-decoration: none; margin-right: 1.5rem;">admin</a>
+        {% endif %}
+        <a class="btn btn-ghost" href="{{ url_for('auth.logout') }}">Sair</a>
+      </div>
+
     {% endif %}
   </main>
 </div>
