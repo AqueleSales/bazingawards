@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pessoas | Bazinga Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #0b0b10; background-image: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 40%), radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 40%); background-attachment: fixed; }
+        .font-bazinga { font-family: 'Bangers', cursive; letter-spacing: 3px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen p-4 md:p-8 flex items-center justify-center relative overflow-hidden">
+
+    <div class="w-full max-w-7xl h-[90vh] flex flex-col md:flex-row gap-6 relative z-10">
+
+        <aside class="w-full md:w-72 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-8 pb-4">
+                <h2 class="text-5xl font-bazinga text-[#FFD700] drop-shadow-[0_0_15px_rgba(255,215,0,0.6)] uppercase">Bazinga</h2>
+            </div>
+            <nav class="flex-1 px-6 space-y-3 mt-4">
+                <a href="{{ url_for('admin.dashboard') }}" class="block px-5 py-3 hover:bg-white/5 rounded-2xl text-gray-400 hover:text-emerald-300 transition-all">Dashboard</a>
+                <a href="{{ url_for('admin.pessoas') }}" class="block px-5 py-3 bg-white/10 border border-emerald-500/30 rounded-2xl text-white font-medium shadow-inner">Pessoas (Cadastros)</a>
+                <a href="{{ url_for('admin.templates_list') }}" class="block px-5 py-3 hover:bg-white/5 rounded-2xl text-gray-400 hover:text-emerald-300 transition-all">Biblioteca de Categorias</a>
+                <a href="{{ url_for('admin.temporadas') }}" class="block px-5 py-3 hover:bg-white/5 rounded-2xl text-gray-400 hover:text-emerald-300 transition-all">Temporadas</a>
+            </nav>
+            <div class="p-6 border-t border-white/10 mt-auto bg-black/20 space-y-2">
+                <a href="{{ url_for('main.index') }}" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 transition-colors">
+                    <span>&larr;</span> Voltar ao Site
+                </a>
+                <a href="{{ url_for('auth.logout') }}" class="text-sm text-red-400 hover:text-red-300 flex items-center gap-2 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Sair do Sistema
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl flex flex-col overflow-hidden relative">
+            <header class="p-8 pb-0 flex justify-between items-center z-10">
+                <div>
+                    <h1 class="text-4xl font-extrabold tracking-tight mb-1">Pessoas e Cadastros</h1>
+                    <p class="text-gray-400">Gerencie quem participa das premiações.</p>
+                </div>
+                <div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
+                    <span class="text-sm font-medium text-gray-300 hidden md:block">{{ admin_user.name }}</span>
+                    {% if admin_user.photo_url %}
+                        <img src="{{ admin_user.photo_url }}" class="w-10 h-10 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] object-cover">
+                    {% else %}
+                        <div class="w-10 h-10 rounded-full bg-emerald-900 border-2 border-emerald-500 flex items-center justify-center font-bold">{{ admin_user.name[0] | upper }}</div>
+                    {% endif %}
+                </div>
+            </header>
+
+            <div class="p-8 overflow-y-auto no-scrollbar flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+                <div class="lg:col-span-2 space-y-3">
+                    {% for p in pessoas %}
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between hover:bg-white/10 transition-all group">
+                        <div class="flex items-center gap-4">
+                            {% if p.photo_url %}
+                                <img src="{{ p.photo_url }}" class="w-12 h-12 rounded-full border-2 border-white/20 object-cover">
+                            {% else %}
+                                <div class="w-12 h-12 rounded-full bg-white/10 border-2 border-white/20 flex items-center justify-center font-bold">{{ p.name[0] | upper }}</div>
+                            {% endif %}
+                            <div>
+                                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                                    {{ p.name }}
+                                    {% if p.is_admin %}<span class="text-[#FFD700] text-sm drop-shadow-[0_0_5px_rgba(255,215,0,0.8)]">★</span>{% endif %}
+                                </h3>
+                                <p class="text-xs text-gray-400 uppercase tracking-wider">
+                                    {% if p.is_manual %}Manual{% elif p.auth_provider == 'google' %}Google{% else %}Discord{% endif %}
+                                </p>
+
+                                <div class="flex gap-1.5 flex-wrap mt-1">
+                                    {% for year in participacoes[p.id] %}
+                                        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20 font-bold tracking-widest shadow-[0_0_5px_rgba(16,185,129,0.1)]">
+                                            {{ year }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                            <button onclick="document.getElementById('modal-edit-{{ p.id }}').showModal()" class="p-2 bg-white/5 hover:bg-emerald-500/20 text-gray-400 hover:text-emerald-400 rounded-lg transition-all" title="Renomear/Editar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                            </button>
+
+                            <form action="{{ url_for('admin.excluir_pessoa', pessoa_id=p.id) }}" method="POST">
+                                <button type="submit" class="p-2 bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-lg transition-all" title="Excluir Direto">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <dialog id="modal-edit-{{ p.id }}" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
+                        <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[420px]">
+                            <h3 class="text-2xl font-bold mb-6 text-white">Editar {{ p.name }}</h3>
+                            <form method="POST" action="{{ url_for('admin.editar_pessoa', pessoa_id=p.id) }}" class="space-y-4">
+                                <input type="text" name="nome" value="{{ p.name }}" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-all">
+
+                                <div class="relative border-2 border-dashed border-white/20 hover:border-emerald-500/50 bg-white/5 rounded-xl p-4 text-center transition-all group min-h-[120px] flex flex-col items-center justify-center">
+                                    <input type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="iniciarCorte(event, 'edit-{{ p.id }}')">
+
+                                    <div id="upload-prompt-edit-{{ p.id }}" class="space-y-1">
+                                        <p class="text-sm text-gray-400 group-hover:text-emerald-400 transition-colors">Nova foto (Arraste ou clique)</p>
+                                    </div>
+
+                                    <div id="preview-container-edit-{{ p.id }}" class="hidden relative z-20">
+                                        <img id="preview-edit-{{ p.id }}" src="" class="w-20 h-20 rounded-full border-2 border-emerald-500 object-cover shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                    </div>
+
+                                    <input type="hidden" name="foto_b64" id="b64-edit-{{ p.id }}">
+                                </div>
+
+                                <div class="flex gap-4 justify-end mt-4">
+                                    <button type="button" onclick="document.getElementById('modal-edit-{{ p.id }}').close()" class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-medium transition-all">Cancelar</button>
+                                    <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Salvar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </dialog>
+                    {% endfor %}
+                </div>
+
+                <div class="bg-black/20 backdrop-blur-xl p-6 rounded-[2rem] border border-white/10 h-fit shadow-inner">
+                    <h2 class="text-xl font-bold mb-4 text-white">Adicionar Amigo</h2>
+                    <form method="POST" action="{{ url_for('admin.pessoas') }}" class="space-y-4">
+                        <input type="text" name="nome" required placeholder="Nome do sujeito" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition-all">
+
+                        <div class="relative border-2 border-dashed border-white/20 hover:border-emerald-500/50 bg-white/5 rounded-xl p-6 text-center transition-all group min-h-[140px] flex flex-col items-center justify-center">
+                            <input type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="iniciarCorte(event, 'add')">
+
+                            <div id="upload-prompt-add" class="space-y-2 group-hover:scale-105 transition-transform">
+                                <svg class="mx-auto h-8 w-8 text-gray-400 group-hover:text-emerald-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                <p class="text-sm text-gray-400 group-hover:text-gray-300">Arraste a foto ou <span class="text-emerald-400 font-medium">clique</span></p>
+                            </div>
+
+                            <div id="preview-container-add" class="hidden relative z-20">
+                                <img id="preview-add" src="" class="w-24 h-24 rounded-full border-2 border-emerald-500 object-cover shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                            </div>
+
+                            <input type="hidden" name="foto_b64" id="b64-add">
+                        </div>
+
+                        <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-400 text-black font-bold py-3 px-4 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Cadastrar</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <dialog id="crop-modal" class="bg-transparent p-0 m-auto backdrop:bg-black/90 backdrop:backdrop-blur-md transition-all z-50">
+        <div class="bg-[#0b0b10] border border-emerald-500/50 p-6 rounded-[2rem] w-[95vw] max-w-md flex flex-col items-center shadow-[0_0_50px_rgba(16,185,129,0.2)]">
+            <h3 class="text-xl font-bold text-white mb-4">Enquadrar Foto</h3>
+            <div class="w-full h-72 bg-black rounded-xl overflow-hidden mb-6 relative">
+                <img id="crop-image" src="" class="max-w-full block">
+            </div>
+            <div class="flex gap-4 w-full justify-end">
+                <button type="button" onclick="cancelarCorte()" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 transition-all">Cancelar</button>
+                <button type="button" onclick="aplicarCorte()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)]">Confirmar Corte</button>
+            </div>
+        </div>
+    </dialog>
+
+    <script>
+        let cropper = null;
+        let inputAlvoAtual = null;
+
+        function iniciarCorte(event, inputId) {
+            if (event.target.files && event.target.files.length > 0) {
+                inputAlvoAtual = inputId;
+                const url = URL.createObjectURL(event.target.files[0]);
+                document.getElementById('crop-image').src = url;
+                document.getElementById('crop-modal').showModal();
+
+                if (cropper) { cropper.destroy(); }
+                cropper = new Cropper(document.getElementById('crop-image'), {
+                    aspectRatio: 1, // Trava o corte em quadrado/círculo perfeito
+                    viewMode: 1,
+                    dragMode: 'move',
+                    background: false
+                });
+            }
+        }
+
+        function cancelarCorte() {
+            document.getElementById('crop-modal').close();
+            if(cropper) cropper.destroy();
+        }
+
+        function aplicarCorte() {
+            if (!cropper) return;
+
+            // Pega a imagem final já cortada
+            const canvas = cropper.getCroppedCanvas({ width: 300, height: 300 });
+            const base64 = canvas.toDataURL('image/png');
+
+            // Salva o texto base64 no input invisível para o Python ler depois
+            document.getElementById(`b64-${inputAlvoAtual}`).value = base64;
+
+            // Mostra a bolinha com a foto perfeitamente cortada no formulário
+            document.getElementById(`preview-${inputAlvoAtual}`).src = base64;
+            document.getElementById(`preview-container-${inputAlvoAtual}`).classList.remove('hidden');
+            document.getElementById(`upload-prompt-${inputAlvoAtual}`).classList.add('hidden');
+
+            cancelarCorte();
+        }
+    </script>
+</body>
+</html>

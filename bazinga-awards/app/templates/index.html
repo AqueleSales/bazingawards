@@ -14,7 +14,11 @@
       {% endif %}
       <h1 class="wordmark">Fala, {{ person.name }}</h1>
       <p class="tagline">Login funcionando. Categorias e votação entram na próxima fase.</p>
-      {% if person.is_admin %}<span class="admin-flag">admin</span>{% endif %}
+
+      {% if person.is_admin %}
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-flag" style="cursor: pointer; text-decoration: none;">admin</a>
+      {% endif %}
+
       <div class="login-row">
         <a class="btn btn-ghost" href="{{ url_for('auth.logout') }}">Sair</a>
       </div>

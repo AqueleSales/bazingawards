@@ -3,6 +3,7 @@ from flask import Flask
 from .auth import auth_bp, oauth
 from .config import Config
 from .main import main_bp
+from .admin.routes import admin_bp  # <-- Importando as rotas do admin
 from .models import db
 
 
@@ -16,6 +17,8 @@ def create_app(config_class=Config):
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
+    app.register_blueprint(admin_bp)  # <-- Registrando o painel admin no Flask
+
 
     with app.app_context():
         db.create_all()
