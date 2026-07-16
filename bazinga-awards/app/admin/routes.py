@@ -6,10 +6,7 @@ from flask import Blueprint, render_template, session, redirect, url_for, abort,
 from ..models import Person, Edition, CategoryTemplate, EditionCategory, Nomination, db
 from datetime import datetime
 
-
-# DEFINIÇÃO DO BLUEPRINT (SEMPRE NO TOPO)
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
-
 
 # --- Helpers e Utils ---
 def salvar_imagem_base64(b64_string):
@@ -32,15 +29,24 @@ def salvar_imagem_base64(b64_string):
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if "person_id" not in session: return redirect(url_for("auth.login", provider="google"))
+        if "person_id" not in session:
+            return redirect(url_for("auth.login", provider="google"))
+
         person = Person.query.get(session["person_id"])
-        if not person or not person.is_admin: abort(403)
+
+        # Se a pessoa sumiu do banco de dados (cookie fantasma), limpa a sessão e manda logar de novo
+        if not person:
+            session.clear()
+            return redirect(url_for("auth.login", provider="google"))
+
+        if not person.is_admin:
+            abort(403)
+
         return f(*args, **kwargs)
 
     return decorated_function
 
-
-# --- Rotas do Dashboard ---
+# --- Rotas do Dashboard e Pessoas ---
 @admin_bp.route("/")
 @admin_required
 def dashboard():
@@ -49,8 +55,6 @@ def dashboard():
                            templates_count=CategoryTemplate.query.count(),
                            edicoes=Edition.query.order_by(Edition.year.desc()).all())
 
-
-# --- Rotas de Pessoas ---
 @admin_bp.route("/pessoas", methods=["GET", "POST"])
 @admin_required
 def pessoas():
@@ -78,7 +82,6 @@ def pessoas():
     return render_template("admin/pessoas.html", admin_user=Person.query.get(session["person_id"]), pessoas=todas,
                            participacoes=part)
 
-
 @admin_bp.route("/pessoas/editar/<int:pessoa_id>", methods=["POST"])
 @admin_required
 def editar_pessoa(pessoa_id):
@@ -89,14 +92,12 @@ def editar_pessoa(pessoa_id):
     db.session.commit()
     return redirect(url_for('admin.pessoas'))
 
-
 @admin_bp.route("/pessoas/excluir/<int:pessoa_id>", methods=["POST"])
 @admin_required
 def excluir_pessoa(pessoa_id):
     db.session.delete(Person.query.get_or_404(pessoa_id))
     db.session.commit()
     return redirect(url_for('admin.pessoas'))
-
 
 # --- Rotas de Templates (Biblioteca) ---
 @admin_bp.route("/templates", methods=["GET", "POST"])
@@ -109,7 +110,6 @@ def templates_list():
     return render_template("admin/templates_list.html", admin_user=Person.query.get(session["person_id"]),
                            templates=CategoryTemplate.query.order_by(CategoryTemplate.name).all())
 
-
 @admin_bp.route("/templates/editar/<int:template_id>", methods=["POST"])
 @admin_required
 def editar_template(template_id):
@@ -118,14 +118,12 @@ def editar_template(template_id):
     db.session.commit()
     return redirect(url_for('admin.templates_list'))
 
-
 @admin_bp.route("/templates/excluir/<int:template_id>", methods=["POST"])
 @admin_required
 def excluir_template(template_id):
     db.session.delete(CategoryTemplate.query.get_or_404(template_id))
     db.session.commit()
     return redirect(url_for('admin.templates_list'))
-
 
 # --- Rotas de Temporadas e Categorias ---
 @admin_bp.route("/temporadas", methods=["GET", "POST"])
@@ -141,7 +139,6 @@ def temporadas():
     return render_template("admin/temporadas.html", admin_user=Person.query.get(session["person_id"]),
                            edicoes=Edition.query.order_by(Edition.year.desc()).all())
 
-
 @admin_bp.route("/temporadas/excluir/<int:edition_id>", methods=["POST"])
 @admin_required
 def excluir_temporada(edition_id):
@@ -154,14 +151,12 @@ def excluir_temporada(edition_id):
     db.session.commit()
     return redirect(url_for('admin.temporadas'))
 
-
 @admin_bp.route("/temporadas/<int:edition_id>")
 @admin_required
 def edicao_painel(edition_id):
     edicao = Edition.query.get_or_404(edition_id)
     categorias = EditionCategory.query.filter_by(edition_id=edition_id).all()
 
-    # Busca manual e infalível dos indicados para cada categoria
     indicados_dict = {}
     for cat in categorias:
         noms = Nomination.query.filter_by(edition_category_id=cat.id).all()
@@ -181,7 +176,6 @@ def edicao_painel(edition_id):
         indicados=indicados_dict
     )
 
-
 @admin_bp.route("/temporadas/<int:edition_id>/importar", methods=["POST"])
 @admin_required
 def importar_categorias(edition_id):
@@ -191,7 +185,6 @@ def importar_categorias(edition_id):
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=edition_id))
 
-
 @admin_bp.route("/temporadas/<int:edition_id>/criar-categoria", methods=["POST"])
 @admin_required
 def criar_categoria_zero(edition_id):
@@ -199,7 +192,6 @@ def criar_categoria_zero(edition_id):
                                    description=request.form.get("descricao")))
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=edition_id))
-
 
 @admin_bp.route("/categoria/<int:cat_id>/editar", methods=["POST"])
 @admin_required
@@ -209,30 +201,30 @@ def editar_categoria(cat_id):
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=cat.edition_id))
 
-
 @admin_bp.route("/categoria/<int:cat_id>/excluir", methods=["POST"])
 @admin_required
 def excluir_categoria(cat_id):
     cat = EditionCategory.query.get_or_404(cat_id)
-
-    # Exorciza os "fantasmas": deleta os indicados antes de deletar a categoria
     Nomination.query.filter_by(edition_category_id=cat.id).delete()
-
     db.session.delete(cat)
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=cat.edition_id))
 
-
-# --- Rotas de Indicados e Duplicação ---
 @admin_bp.route("/categoria/<int:cat_id>/indicado/adicionar", methods=["POST"])
 @admin_required
 def adicionar_indicado(cat_id):
-    p_id = request.form.get("person_id")
-    if not Nomination.query.filter_by(edition_category_id=cat_id, person_id=p_id).first():
-        db.session.add(Nomination(edition_category_id=cat_id, person_id=p_id))
-        db.session.commit()
-    return redirect(url_for('admin.edicao_painel', edition_id=EditionCategory.query.get(cat_id).edition_id))
+    person_ids = request.form.getlist("person_id")
+    categoria = EditionCategory.query.get_or_404(cat_id)
 
+    if person_ids:
+        for p_id in person_ids:
+            existe = Nomination.query.filter_by(edition_category_id=cat_id, person_id=p_id).first()
+            if not existe:
+                nova_indicacao = Nomination(edition_category_id=cat_id, person_id=p_id)
+                db.session.add(nova_indicacao)
+        db.session.commit()
+
+    return redirect(url_for('admin.edicao_painel', edition_id=categoria.edition_id))
 
 @admin_bp.route("/indicado/<int:nom_id>/excluir", methods=["POST"])
 @admin_required
@@ -244,26 +236,22 @@ def excluir_indicado(nom_id):
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=eid))
 
-
 @admin_bp.route("/categoria/<int:cat_id>/duplicar", methods=["POST"])
 @admin_required
 def duplicar_categoria(cat_id):
     cat_original = EditionCategory.query.get_or_404(cat_id)
 
-    # 1. Cria a categoria e SALVA no banco para gerar um ID real
     nova_cat = EditionCategory(
         edition_id=cat_original.edition_id,
         name=f"{cat_original.name} (Cópia)",
         description=cat_original.description
     )
     db.session.add(nova_cat)
-    db.session.commit()  # <-- Agora a nova_cat.id existe de verdade!
+    db.session.commit()
 
-    # 2. Limpeza de segurança: Se o banco reaproveitou um ID com "fantasmas", apagamos eles.
     Nomination.query.filter_by(edition_category_id=nova_cat.id).delete()
     db.session.commit()
 
-    # 3. Clona todos os indicados originais
     noms_originais = Nomination.query.filter_by(edition_category_id=cat_original.id).all()
     for nom in noms_originais:
         nova_nom = Nomination(
@@ -275,16 +263,12 @@ def duplicar_categoria(cat_id):
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=cat_original.edition_id))
 
-
 @admin_bp.route("/temporadas/<int:edition_id>/configurar", methods=["POST"])
 @admin_required
 def configurar_temporada(edition_id):
     edicao = Edition.query.get_or_404(edition_id)
-
-    # Atualiza o status manual
     edicao.state = request.form.get("state", edicao.state)
 
-    # Função para converter o formato de data do HTML para o Python
     def parse_dt(dt_str):
         if dt_str:
             return datetime.strptime(dt_str, '%Y-%m-%dT%H:%M')
@@ -296,3 +280,16 @@ def configurar_temporada(edition_id):
 
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=edicao.id))
+
+
+@admin_bp.route("/pessoas/toggle-admin/<int:pessoa_id>", methods=["POST"])
+@admin_required
+def toggle_admin(pessoa_id):
+    p = Person.query.get_or_404(pessoa_id)
+
+    # Trava de segurança: Você não pode remover o próprio cargo de Admin
+    if p.id != session["person_id"]:
+        p.is_admin = not p.is_admin
+        db.session.commit()
+
+    return redirect(url_for('admin.pessoas'))

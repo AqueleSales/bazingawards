@@ -12,3 +12,10 @@ __pycache__/
 # Ambientes Virtuais
 venv/
 .venv/
+
+.env
+instance/
+__pycache__/
+*.pyc
+.idea/
+.venv/

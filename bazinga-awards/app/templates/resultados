@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+  .res-container { max-width: 1000px; margin: 0 auto; width: 100%; padding-bottom: 4rem; }
+  .res-cat-box { margin-bottom: 4rem; text-align: center; }
+  .res-title { font-family: 'Fraunces', serif; font-size: 2.2rem; color: #fff; margin-bottom: 2rem; }
+
+  .res-podium { display: flex; align-items: flex-end; justify-content: center; gap: 2rem; }
+  .res-slot { display: flex; flex-direction: column; align-items: center; width: 120px; }
+  .res-1 { order: 2; margin-bottom: 30px; transform: scale(1.15); }
+  .res-2 { order: 1; }
+  .res-3 { order: 3; }
+
+  .res-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid transparent; margin-bottom: 1rem; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 2rem; color: #fff;}
+  .b-gold { border-color: #facc15; box-shadow: 0 0 20px rgba(250, 204, 21, 0.3); }
+  .b-silver { border-color: #9ca3af; }
+  .b-bronze { border-color: #b45309; }
+
+  .res-name { font-family: 'Inter', sans-serif; color: #fff; font-weight: 600; font-size: 0.9rem; }
+  .res-votes { font-family: 'JetBrains Mono', monospace; color: rgba(255,255,255,0.4); font-size: 0.75rem; }
+</style>
+
+<div class="stage">
+  <div class="curtain curtain-left"></div>
+  <div class="curtain curtain-right"></div>
+
+  <main class="stage-content" style="padding-top: 4rem;">
+    <div class="res-container">
+        <div style="text-align: left; margin-bottom: 2rem;">
+            <a href="/" style="color: #666; text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 600; transition: color 0.3s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#666'">← Voltar ao Início</a>
+        </div>
+
+        <h1 class="wordmark" style="font-size: 3.5rem; color: #facc15; margin-bottom: 0;">Resultados Finais</h1>
+        <p class="tagline" style="margin-bottom: 4rem;">Bazinga Awards - Temporada {{ edicao.year }}</p>
+
+        {% for cat in ranking %}
+        <div class="res-cat-box">
+            <h2 class="res-title">{{ cat.nome }}</h2>
+
+            <div class="res-podium">
+                {% for p in cat.podio %}
+                    {% if loop.index0 < 3 %}
+                        <div class="res-slot res-{{ loop.index }}">
+                            {% set b_color = 'b-gold' if loop.index == 1 else ('b-silver' if loop.index == 2 else 'b-bronze') %}
+
+                            {% if p.foto %}
+                                <img src="{{ p.foto }}" class="res-avatar {{ b_color }}">
+                            {% else %}
+                                <div class="res-avatar {{ b_color }}">{{ p.nome[0] | upper }}</div>
+                            {% endif %}
+
+                            <span class="res-name">{{ p.nome }}</span>
+                            <span class="res-votes">{{ p.votos }} Votos</span>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p style="color: rgba(255,255,255,0.4); font-family: 'Inter', sans-serif;">Nenhum voto registrado.</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+  </main>
+</div>
+{% endblock %}

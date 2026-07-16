@@ -16,8 +16,10 @@ def create_app(config_class=Config):
     _register_oauth_providers(app)
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    from .main.routes import main_bp
     app.register_blueprint(main_bp)
-    app.register_blueprint(admin_bp)  # <-- Registrando o painel admin no Flask
+    # <-- Registrando o painel admin no Flask
 
 
     with app.app_context():

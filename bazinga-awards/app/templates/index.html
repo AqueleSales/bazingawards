@@ -1,136 +1,110 @@
 {% extends "base.html" %}
 
 {% block content %}
-
 <style>
-  /* Animações e Estilos Premium (GOTY Style) - Sem alterar seu style.css */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+  /* ========================================= */
+  /* ESTILOS ORIGINAIS DO TELÃO E BASE         */
+  /* ========================================= */
+  .gala-header { position: absolute; top: 2rem; left: 0; right: 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 4rem; z-index: 50; width: 100%; box-sizing: border-box; }
+  .gala-profile { display: flex; align-items: center; gap: 1rem; cursor: pointer; padding-bottom: 10px; }
+  .gala-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255, 255, 255, 0.2); transition: border-color 0.3s; }
+  .profile-wrapper:hover .gala-avatar { border-color: #facc15; }
+  .gala-user-info { display: flex; flex-direction: column; align-items: flex-start; }
+  .gala-name { font-family: 'Inter', sans-serif; color: #fff; font-size: 0.95rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .gala-name svg { width: 12px; height: 12px; opacity: 0.5; transition: opacity 0.3s; }
+  .profile-wrapper:hover .gala-name svg { opacity: 1; }
+
+  .admin-btn { font-family: 'Inter', sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #facc15; border: 1px solid rgba(250, 204, 21, 0.4); padding: 0.5rem 1.2rem; border-radius: 2rem; text-decoration: none; transition: all 0.3s; }
+  .admin-btn:hover { background: rgba(250, 204, 21, 0.1); }
+
+  .gala-logo { display: flex; flex-direction: column; align-items: center; line-height: 1; font-family: 'Fraunces', serif; font-size: 2.2rem; color: #facc15; font-weight: 600; letter-spacing: 1px; position: absolute; left: 50%; transform: translateX(-50%); }
+
+  .telao-container { width: 100%; max-width: 1100px; margin: 6rem auto 0 auto; position: relative; }
+  .slide { display: none; width: 100%; animation: fadeSlide 0.5s forwards; }
+  .slide.active { display: block; }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+  .telao-header { text-align: center; margin-bottom: 2rem; }
+  .category-title { font-family: 'Fraunces', serif; font-size: 3rem; color: #fff; margin-bottom: 0.5rem; font-weight: 500; }
+  .category-desc { font-family: 'Inter', sans-serif; color: rgba(255, 255, 255, 0.6); font-size: 1.1rem; }
+  .nominees-scroll-area { max-height: 45vh; overflow-y: auto; padding: 1rem; scrollbar-width: none; }
+  .nominees-grid { display: flex; flex-wrap: wrap; gap: 2.5rem; justify-content: center; }
+  .nominee-card { width: 120px; cursor: pointer; transition: transform 0.3s ease; text-align: center; }
+  .nominee-card:hover { transform: translateY(-8px); }
+  .nominee-img-wrap { position: relative; width: 100px; height: 100px; margin: 0 auto 1rem auto; border-radius: 50%; padding: 3px; transition: all 0.3s; }
+  .nominee-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); }
+  .nominee-card.selecionado .nominee-img-wrap { background: linear-gradient(135deg, #facc15, #a18000); box-shadow: 0 10px 25px rgba(250, 204, 21, 0.3); }
+  .nominee-card.selecionado .nominee-img { border-color: #050508; }
+  .nominee-name { font-family: 'Inter', sans-serif; color: #ccc; font-size: 0.95rem; font-weight: 500; }
+  .nominee-card.selecionado .nominee-name { color: #facc15; font-weight: 600; }
+  .telao-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding: 0 1rem; }
+  .nav-btn { background: transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; padding: 0.6rem 1.5rem; border-radius: 2rem; font-family: 'Inter', sans-serif; font-size: 0.85rem; text-transform: uppercase; cursor: pointer; transition: all 0.3s; }
+  .nav-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.1); border-color: #fff; }
+  .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .progress-dots { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; max-width: 50%; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); cursor: pointer; transition: all 0.3s; }
+  .dot.active { background: #facc15; box-shadow: 0 0 10px rgba(250, 204, 21, 0.5); transform: scale(1.2); }
+  .timeline-link { color: #666; font-family: 'Inter', sans-serif; text-decoration: none; font-weight: 500; transition: all 0.3s; }
+  .timeline-link:hover { color: #facc15; text-decoration: underline; }
+
+  /* ========================================= */
+  /* CARTÃO DE PERFIL ESTILO DISCORD (FIXO)    */
+  /* ========================================= */
+  .profile-wrapper { position: relative; display: inline-block; z-index: 100; }
+
+  .profile-popout {
+      position: absolute; top: 100%; left: 0; margin-top: -5px;
+      width: 300px; background: #111214; border-radius: 12px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.08);
+      opacity: 0; visibility: hidden; transform: translateY(-10px);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      padding: 20px; cursor: default;
   }
 
-  .voting-container {
-    animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    width: 100%;
-    max-width: 1000px;
-    margin: 4rem auto 0 auto;
-    text-align: left;
-    padding: 0 1rem;
+  .profile-wrapper:hover .profile-popout, .profile-popout:hover {
+      opacity: 1; visibility: visible; transform: translateY(0);
   }
 
-  .category-block {
-    margin-bottom: 5rem;
-  }
+  .popout-header { display: flex; flex-direction: column; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 15px; }
+  .popout-avatar-section { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .popout-avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 4px solid #1e1f22; background: #2b2d31; }
 
-  .category-title {
-    font-family: 'Fraunces', serif;
-    font-size: 2.2rem;
-    color: #ffffff;
-    font-weight: 500;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 0.8rem;
-    margin-bottom: 0.5rem;
-  }
+  .popout-info { position: relative; width: 100%; }
+  .popout-name-label { font-family: 'Inter', sans-serif; font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: #b5bac1; margin-bottom: 4px; letter-spacing: 0.5px; }
+  .popout-name-display { display: flex; align-items: center; justify-content: space-between; }
+  .popout-name { font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 800; color: #f2f3f5; word-break: break-word; }
 
-  .category-desc {
-    font-family: 'Inter', sans-serif;
-    color: #888888;
-    font-size: 0.95rem;
-    margin-bottom: 2.5rem;
-  }
+  .edit-pencil { cursor: pointer; color: #b5bac1; transition: color 0.2s; padding: 4px; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+  .edit-pencil:hover { color: #facc15; background: rgba(255,255,255,0.05); }
+  .edit-pencil svg { width: 16px; height: 16px; }
 
-  .nominees-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 2.5rem;
-  }
+  /* Formulário de Edição */
+  .popout-edit-form { display: none; align-items: center; gap: 8px; width: 100%; }
+  .popout-edit-form.active { display: flex; }
+  .popout-name-display.hidden { display: none; }
+  .popout-input { flex: 1; width: 100%; background: #1e1f22; border: 1px solid #383a40; color: #dbdee1; border-radius: 6px; padding: 6px 10px; font-size: 0.95rem; font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s; }
+  .popout-input:focus { border-color: #facc15; }
+  .popout-save-btn { background: rgba(250, 204, 21, 0.1); border: 1px solid rgba(250, 204, 21, 0.3); color: #facc15; cursor: pointer; padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+  .popout-save-btn:hover { background: rgba(250, 204, 21, 0.2); }
+  .popout-save-btn svg { width: 16px; height: 16px; }
 
-  .nominee-card {
-    background: transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-  }
+  /* Sala de Troféus */
+  .trophy-section-title { display: flex; align-items: center; gap: 6px; font-family: 'Inter', sans-serif; font-size: 0.7rem; text-transform: uppercase; font-weight: 800; color: #b5bac1; margin-bottom: 12px; letter-spacing: 0.5px; }
+  .trophy-section-title svg { width: 14px; height: 14px; color: #facc15; }
+  .trophy-list { max-height: 130px; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
+  .trophy-list::-webkit-scrollbar { display: none; }
+  .trophy-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.03); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+  .trophy-season { font-family: 'Inter', sans-serif; color: #dbdee1; font-size: 0.85rem; font-weight: 500; }
+  .trophy-count { color: #facc15; font-weight: 700; font-size: 0.9rem; font-family: 'Inter', sans-serif; }
+  .trophy-empty { text-align: center; padding: 15px; color: #80848e; font-size: 0.8rem; font-family: 'Inter', sans-serif; background: rgba(0,0,0,0.2); border-radius: 8px; font-style: italic; }
 
-  /* O anel ao redor da foto */
-  .img-ring {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    margin-bottom: 1.2rem;
-    border-radius: 50%;
-    padding: 4px; /* Espaço para o anel de seleção */
-    background: transparent;
-    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
+  /* Rodapé do Perfil */
+  .trophy-total-box { background: rgba(250, 204, 21, 0.05); border-top: 1px solid rgba(255,255,255,0.05); margin: 0 -20px -20px -20px; padding: 15px 20px; border-radius: 0 0 12px 12px; display: flex; justify-content: space-between; align-items: center; }
+  .trophy-total-label { font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 800; color: #dbdee1; text-transform: uppercase; letter-spacing: 1px; }
+  .trophy-total-value { font-family: 'Inter', sans-serif; font-size: 1.3rem; font-weight: 900; color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.3); }
 
-  /* Efeito Hover na foto inteira */
-  .nominee-card:hover .img-ring {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
-  }
-
-  /* Estilo da foto em si */
-  .nominee-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    background: #111;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    transition: border-color 0.4s ease;
-  }
-
-  /* Nome do Indicado */
-  .nominee-name {
-    font-family: 'Inter', sans-serif;
-    font-size: 1.05rem;
-    font-weight: 500;
-    color: #cccccc;
-    text-align: center;
-    transition: color 0.3s ease;
-  }
-
-  /* --- ESTADOS DE SELEÇÃO --- */
-  .nominee-card.selecionado .img-ring {
-    background: linear-gradient(135deg, #FFD700, #b89600); /* Dourado Premium */
-    transform: translateY(-8px);
-  }
-
-  .nominee-card.selecionado .nominee-img {
-    border-color: #050508; /* Contraste com o anel */
-  }
-
-  .nominee-card.selecionado .nominee-name {
-    color: #ffffff;
-    font-weight: 600;
-  }
-
-  /* Ícone de Check elegante */
-  .check-icon {
-    opacity: 0;
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    background: #FFD700;
-    color: #050508;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 3px solid #050508;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: scale(0.5);
-  }
-
-  .nominee-card.selecionado .check-icon {
-    opacity: 1;
-    transform: scale(1);
-  }
-
+  .logout-btn-top { background: transparent; border: none; color: #80848e; cursor: pointer; transition: color 0.2s; padding: 4px; display: flex; align-items: center; text-decoration: none; }
+  .logout-btn-top:hover { color: #f23f42; }
+  .logout-btn-top svg { width: 18px; height: 18px; }
 </style>
 
 <div class="stage">
@@ -138,132 +112,285 @@
   <div class="curtain curtain-right"></div>
   <div class="spotlight"></div>
 
-  <main class="stage-content">
+  {% if user %}
+  <header class="gala-header">
+
+    <!-- Perfil Popout (Substituição Limpa) -->
+    <div class="profile-wrapper">
+        <div class="gala-profile">
+            {% if user.photo_url %}<img src="{{ user.photo_url }}" class="gala-avatar">
+            {% else %}<div class="gala-avatar" style="display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.1); color:#fff; font-family:'Fraunces', serif;">{{ user.name[0] | upper }}</div>{% endif %}
+
+            <div class="gala-user-info">
+                <span class="gala-name">{{ user.name }}
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </span>
+            </div>
+        </div>
+
+        <!-- Popout Box -->
+        <div class="profile-popout" id="popoutInfoArea">
+            <div class="popout-header">
+                <div class="popout-avatar-section">
+                    {% if user.photo_url %}<img src="{{ user.photo_url }}" class="popout-avatar">
+                    {% else %}<div class="popout-avatar" style="display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.1); color:#fff; font-family:'Fraunces', serif; font-size: 1.5rem;">{{ user.name[0] | upper }}</div>{% endif %}
+
+                    <a href="{{ url_for('auth.logout') }}" class="logout-btn-top" title="Desconectar">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </a>
+                </div>
+
+                <div class="popout-info">
+                    <div class="popout-name-label">Display Name</div>
+
+                    <div class="popout-name-display" id="nameDisplay">
+                        <span class="popout-name">{{ user.name }}</span>
+                        <span class="edit-pencil" onclick="enableEdit()" title="Editar Nome">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </span>
+                    </div>
+
+                    <form action="/atualizar_nome" method="POST" class="popout-edit-form" id="nameForm">
+                        <input type="text" name="novo_nome" id="nameInput" value="{{ user.name }}" class="popout-input" required autocomplete="off">
+                        <button type="submit" class="popout-save-btn" title="Salvar">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="trophy-section-title">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                Sala de Troféus
+            </div>
+
+            <div class="trophy-list">
+                {% for hist in historico_premios %}
+                <div class="trophy-item">
+                    <span class="trophy-season">Temporada {{ hist.ano }}</span>
+                    <span class="trophy-count">{{ hist.trofeus }}</span>
+                </div>
+                {% else %}
+                <div class="trophy-empty">Você ainda não concorreu a nada.</div>
+                {% endfor %}
+            </div>
+
+            <div class="trophy-total-box">
+                <span class="trophy-total-label">Total Arrecadado</span>
+                <span class="trophy-total-value">{{ total_trofeus }} <span style="font-size: 0.9rem;">🏆</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Título do Logo Centralizado -->
+    <div class="gala-logo">
+        BAZINGA AWARDS
+        {% if edicao %}<span style="font-family: 'Inter', sans-serif; font-size: 0.7rem; letter-spacing: 2px; color: rgba(255,255,255,0.5); margin-top: 4px;">TEMPORADA {{ edicao.year }}</span>{% endif %}
+    </div>
+
+    <div>
+        {% if user.is_admin %}
+            <a href="{{ url_for('admin.dashboard') }}" class="admin-btn">Modo Admin</a>
+        {% else %}
+            <div style="width: 100px;"></div>
+        {% endif %}
+    </div>
+  </header>
+  {% endif %}
+
+  <main class="stage-content" style="{% if user %}padding-top: 5rem;{% endif %}">
+
     {% if not user %}
-      <span class="eyebrow">temporada {{ edicao.year if edicao else '2026' }}</span>
-      <h1 class="wordmark">Bazinga Awards</h1>
+      <h1 class="wordmark" style="font-size: 5.5rem; margin-bottom: 0;">Bazinga Awards</h1>
+      {% if edicao %}<h3 style="font-family: 'Inter', sans-serif; color: #facc15; font-size: 1.2rem; letter-spacing: 4px; margin-bottom: 2rem; text-transform: uppercase;">Temporada {{ edicao.year }}</h3>{% endif %}
+
       <p class="tagline">A premiação oficial do servidor. Vote, discuta, dispute o troféu.</p>
-      <div class="login-row">
-        <a class="btn btn-google" href="{{ url_for('auth.login', provider='google') }}">
-          Entrar com Google
-        </a>
-        <a class="btn btn-discord" href="{{ url_for('auth.login', provider='discord') }}">
-          Entrar com Discord
-        </a>
+
+      <div class="login-row" style="margin-top: 3rem;">
+        <a class="btn btn-google" href="{{ url_for('auth.login', provider='google') }}">Entrar com Google</a>
+        <a class="btn btn-discord" href="{{ url_for('auth.login', provider='discord') }}">Entrar com Discord</a>
       </div>
 
     {% else %}
-      <span class="eyebrow">conta conectada</span>
-      {% if user.photo_url %}
-        <img class="avatar" src="{{ user.photo_url }}" alt="{{ user.name }}">
-      {% endif %}
-      <h1 class="wordmark" style="font-size: 3rem; margin-bottom: 0.5rem;">Fala, {{ user.name }}</h1>
 
-      {% if status_real == 'ANNOUNCED' %}
-        <p class="tagline">A paciência é uma virtude. A votação da temporada {{ edicao.year }} ainda não começou.</p>
-        {% if edicao.voting_start %}
-          <p class="tagline" style="color: #FFD700; font-family: 'JetBrains Mono', monospace; margin-top: 1rem; font-size: 0.9rem;">
-            ABERTURA: {{ edicao.voting_start.strftime('%d/%m/%Y às %H:%M') }}
-          </p>
-        {% endif %}
+      {% if status_real == 'NO_EDITION' %}
+        <div style="margin-top: 10rem;">
+          <h2 class="wordmark" style="font-size: 4rem; color: #facc15;">Aguarde...</h2>
+          <p class="tagline">Nenhuma temporada foi criada pelo Administrador ainda. O palco está sendo montado.</p>
+        </div>
 
-      {% elif status_real == 'CLOSED' %}
-        <p class="tagline">Votações Encerradas. As urnas foram fechadas e os votos estão sob auditoria.</p>
-        {% if edicao.presentation_date %}
-          <p class="tagline" style="color: #FFD700; font-family: 'JetBrains Mono', monospace; margin-top: 1rem; font-size: 0.9rem;">
-            CERIMÔNIA OFICIAL: {{ edicao.presentation_date.strftime('%d/%m/%Y às %H:%M') }}
+      {% elif status_real in ['ANNOUNCED', 'CLOSED'] %}
+        <div style="margin-top: 10rem;">
+          <h2 class="wordmark" style="font-size: 3rem; {% if status_real == 'CLOSED' %}color: #ef4444;{% endif %}">
+            {% if status_real == 'ANNOUNCED' %}Aguarde{% else %}Lockdown{% endif %}
+          </h2>
+          <p class="tagline">
+            {% if status_real == 'ANNOUNCED' %}A paciência é uma virtude. As urnas ainda não foram abertas.
+            {% else %}As urnas foram lacradas. Os votos estão sendo apurados em segredo.{% endif %}
           </p>
-        {% endif %}
+
+          {% if next_date %}
+          <div style="margin-top: 2rem; border: 1px solid rgba(255,215,0,0.3); padding: 1.5rem 3rem; border-radius: 1rem; display: inline-block; background: rgba(255,215,0,0.05); backdrop-filter: blur(5px);">
+              <p style="font-family: 'Inter', sans-serif; color: #aaa; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem;">{{ evento_timer }}</p>
+              <p id="timer-countdown" style="font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; color: #facc15; font-weight: bold; margin: 0;">--h --m --s</p>
+          </div>
+          {% endif %}
+        </div>
 
       {% elif status_real == 'REVEALING' %}
-        <p class="tagline">O Grande Dia Chegou. A revelação dos vencedores já está disponível para visualização.</p>
-        <div class="login-row" style="margin-top: 2rem;">
-            <a class="btn" style="background-color: #FFD700; color: #000; font-family: 'Inter', sans-serif; font-weight: 600; border: none;" href="#">
-              Acompanhar Cerimônia
-            </a>
+        <div style="margin-top: 10rem;">
+          <h2 class="wordmark" style="font-size: 4rem; color: #facc15;">O Grande Dia Chegou</h2>
+          <p class="tagline">A revelação dos vencedores já está disponível.</p>
+          <div class="login-row" style="margin-top: 3rem;">
+            <a class="btn" style="background-color: #facc15; color: #000; text-decoration: none;" href="{{ url_for('main.cerimonia') }}">Iniciar Cerimônia</a>
+          </div>
+        </div>
+
+      {% elif status_real == 'FINISHED' %}
+        <div style="margin-top: 10rem;">
+          <h2 class="wordmark" style="font-size: 3.5rem; color: #666;">Temporada Encerrada</h2>
+          <p class="tagline">Esta edição foi arquivada na linha do tempo.</p>
+          <div class="login-row" style="margin-top: 3rem;">
+            <a class="btn" style="background-color: transparent; border: 1px solid #666; color: #fff; text-decoration: none;" href="{{ url_for('main.resultados_temporada', year=edicao.year) }}">Ver Resultados Finais</a>
+          </div>
         </div>
 
       {% elif status_real == 'VOTING' %}
-        <p class="tagline">As urnas estão abertas. Clique no retrato para registrar seu voto anonimamente.</p>
+        <div class="telao-container">
+            {% if next_date %}
+            <div style="text-align: right; padding-right: 1rem; margin-bottom: -1rem;">
+                <span style="font-family: 'Inter', sans-serif; font-size: 0.8rem; color: #10b981;">Encerra em: </span>
+                <span id="timer-countdown" style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #10b981; font-weight: bold;">--:--:--</span>
+            </div>
+            {% endif %}
 
-        <div class="voting-container">
             {% for cat in categorias %}
-            <div class="category-block">
-                <h2 class="category-title">{{ cat.name }}</h2>
-                <p class="category-desc">{{ cat.description }}</p>
-
-                <div class="nominees-grid">
-                    {% for pessoa in indicados[cat.id] %}
-                    {% set is_voted = (meus_votos.get(cat.id) == pessoa.id) %}
-
-                    <div onclick="registrarVoto({{ cat.id }}, {{ pessoa.id }}, this)"
-                         class="nominee-card {% if is_voted %}selecionado{% endif %}">
-
-                        <div class="img-ring">
-                            {% if pessoa.photo_url %}
-                                <img src="{{ pessoa.photo_url }}" class="nominee-img">
-                            {% else %}
-                                <div class="nominee-img" style="display: flex; align-items: center; justify-content: center; font-family: 'Fraunces', serif; font-size: 2rem; color: #fff;">
-                                    {{ pessoa.name[0] | upper }}
-                                </div>
-                            {% endif %}
-
-                            <div class="check-icon">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                            </div>
-                        </div>
-
-                        <span class="nominee-name">{{ pessoa.name }}</span>
-                    </div>
-                    {% else %}
-                    <p style="color: #555; font-family: 'Inter', sans-serif; font-style: italic; font-size: 0.9rem;">Lista de indicados em segredo.</p>
-                    {% endfor %}
+            <div class="slide {% if loop.first %}active{% endif %}">
+                <div class="telao-header">
+                  <h2 class="category-title">{{ cat.name }}</h2>
+                  <p class="category-desc">{{ cat.description }}</p>
+                </div>
+                <div class="nominees-scroll-area">
+                  <div class="nominees-grid">
+                      {% for pessoa in indicados[cat.id] %}
+                      {% set is_voted = (meus_votos.get(cat.id) == pessoa.id) %}
+                      <div onclick="registrarVoto({{ cat.id }}, {{ pessoa.id }}, this)" class="nominee-card {% if is_voted %}selecionado{% endif %}">
+                          <div class="nominee-img-wrap">
+                              {% if pessoa.photo_url %}<img src="{{ pessoa.photo_url }}" class="nominee-img">
+                              {% else %}<div class="nominee-img" style="display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); font-family:'Fraunces', serif; font-size:2rem; color:#fff;">{{ pessoa.name[0] | upper }}</div>{% endif %}
+                          </div>
+                          <span class="nominee-name">{{ pessoa.name }}</span>
+                      </div>
+                      {% endfor %}
+                  </div>
                 </div>
             </div>
             {% endfor %}
+
+            <div class="telao-controls">
+                <button class="nav-btn" id="btn-prev" onclick="mudarSlide(-1)">Anterior</button>
+                <div class="progress-dots">
+                    {% for cat in categorias %}<div class="dot {% if loop.first %}active{% endif %}" onclick="irParaSlide({{ loop.index0 }})"></div>{% endfor %}
+                </div>
+                <button class="nav-btn" id="btn-next" onclick="mudarSlide(1)">Próximo</button>
+            </div>
         </div>
 
         <script>
-            function registrarVoto(categoriaId, nomineeId, cardClicado) {
-                // Seleciona a div 'category-block' pai para limpar apenas os indicados daquela categoria
-                const containerCategoria = cardClicado.closest('.category-block');
-                const todosOsCards = containerCategoria.querySelectorAll('.nominee-card');
+            let slideAtual = 0; const slides = document.querySelectorAll('.slide'); const dots = document.querySelectorAll('.dot');
+            function atualizarControles() {
+                if(slides.length === 0) return;
+                document.getElementById('btn-prev').disabled = (slideAtual === 0);
+                document.getElementById('btn-next').disabled = (slideAtual === slides.length - 1);
+                slides.forEach((s, i) => s.classList.toggle('active', i === slideAtual));
+                dots.forEach((d, i) => d.classList.toggle('active', i === slideAtual));
+            }
+            function mudarSlide(dir) { slideAtual += dir; if(slideAtual < 0) slideAtual = 0; if(slideAtual >= slides.length) slideAtual = slides.length-1; atualizarControles(); }
+            function irParaSlide(i) { slideAtual = i; atualizarControles(); }
+            atualizarControles();
 
-                // Remove a classe 'selecionado' de todos
-                todosOsCards.forEach(card => {
-                    card.classList.remove('selecionado');
-                });
-
-                // Aplica a classe 'selecionado' no card clicado (o CSS cuida da animação)
-                cardClicado.classList.add('selecionado');
-
-                // Envia o voto silenciosamente para o Python
-                fetch('/votar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ categoria_id: categoriaId, nominee_id: nomineeId })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if(!data.success) {
-                        alert("Não foi possível registrar o voto. Tente novamente.");
-                    }
-                })
-                .catch(error => console.error('Erro de rede:', error));
+            function registrarVoto(catId, nomId, card) {
+                card.closest('.nominees-grid').querySelectorAll('.nominee-card').forEach(c => c.classList.remove('selecionado'));
+                card.classList.add('selecionado');
+                fetch('/votar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ categoria_id: catId, nominee_id: nomId }) });
             }
         </script>
       {% endif %}
 
-      <div class="login-row" style="margin-top: 3rem;">
-        {% if user.is_admin %}
-          <a href="{{ url_for('admin.dashboard') }}" class="admin-flag" style="cursor: pointer; text-decoration: none; margin-right: 1.5rem;">admin</a>
-        {% endif %}
-        <a class="btn btn-ghost" href="{{ url_for('auth.logout') }}">Sair</a>
-      </div>
-
     {% endif %}
+
+    {% if edicoes_passadas %}
+    <div style="margin-top: 5rem; display: flex; gap: 1.5rem; justify-content: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem;">
+        {% for ed in edicoes_passadas %}
+            <a href="{{ url_for('main.resultados_temporada', year=ed.year) }}" class="timeline-link">Temporada {{ ed.year }}</a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
   </main>
 </div>
+
+{% if next_date %}
+<script>
+  const countDownDate = new Date("{{ next_date }}").getTime();
+  const timerEl = document.getElementById("timer-countdown");
+
+  const x = setInterval(function() {
+    const now = new Date().getTime();
+    const distance = countDownDate - now;
+
+    if (distance < 0) {
+      clearInterval(x);
+      timerEl.innerHTML = "Processando...";
+      setTimeout(() => window.location.reload(), 2000);
+    } else {
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      let timerText = "";
+      if (days > 0) timerText += days + "d ";
+      timerText += hours + "h " + minutes + "m " + seconds + "s";
+      timerEl.innerHTML = timerText;
+    }
+  }, 1000);
+</script>
+{% endif %}
+
+<!-- SCRIPT DO CARTÃO DE PERFIL -->
+<script>
+    function enableEdit() {
+        document.getElementById('nameDisplay').classList.add('hidden');
+        document.getElementById('nameForm').classList.add('active');
+        const input = document.getElementById('nameInput');
+        input.focus();
+
+        const val = input.value;
+        input.value = '';
+        input.value = val;
+    }
+
+    document.addEventListener('click', function(event) {
+        const infoArea = document.getElementById('popoutInfoArea');
+        if (infoArea && !infoArea.contains(event.target)) {
+            const display = document.getElementById('nameDisplay');
+            const form = document.getElementById('nameForm');
+            if(display && form) {
+                display.classList.remove('hidden');
+                form.classList.remove('active');
+            }
+        }
+    });
+
+    const nameInput = document.getElementById('nameInput');
+    if(nameInput) {
+        nameInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('nameDisplay').classList.remove('hidden');
+                document.getElementById('nameForm').classList.remove('active');
+            }
+        });
+    }
+</script>
 {% endblock %}

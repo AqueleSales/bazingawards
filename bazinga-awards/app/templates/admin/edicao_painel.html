@@ -27,7 +27,7 @@
                 <a href="{{ url_for('admin.temporadas') }}" class="block px-5 py-3 bg-white/10 border border-emerald-500/30 rounded-2xl text-white font-medium shadow-inner">Temporadas</a>
             </nav>
             <div class="p-6 border-t border-white/10 mt-auto bg-black/20 space-y-2">
-                <a href="{{ url_for('admin.dashboard') }}" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 transition-colors"><span>&larr;</span> Voltar ao Dashboard</a>
+                <a href="/" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 transition-colors"><span>&larr;</span> Voltar ao Site</a>
                 <a href="{{ url_for('auth.logout') }}" class="text-sm text-red-400 hover:text-red-300 flex items-center gap-2 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                     Sair do Sistema
@@ -137,24 +137,76 @@
                         </div>
                     </div>
 
+                    <!-- NOVO MODAL DE INDICAR (MÚLTIPLA SELEÇÃO + JÁ INDICADOS) -->
                     <dialog id="modal-add-{{ cat.id }}" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
-                        <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[420px]">
+                        <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[450px]">
                             <h3 class="text-2xl font-bold mb-6 text-white">Indicar para {{ cat.name }}</h3>
-                            <form action="{{ url_for('admin.adicionar_indicado', cat_id=cat.id) }}" method="POST" class="space-y-4">
-                                <select name="person_id" required class="w-full bg-[#0b0b10] border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-all cursor-pointer">
-                                    <option value="" disabled selected>Selecione uma pessoa...</option>
+                            <form action="{{ url_for('admin.adicionar_indicado', cat_id=cat.id) }}" method="POST">
+
+                                <div class="space-y-3 mb-8 max-h-60 overflow-y-auto pr-2 no-scrollbar">
                                     {% for p in all_people %}
-                                    <option value="{{ p.id }}">{{ p.name }}</option>
+
+                                    <!-- Lógica Jinja para verificar se a pessoa já está indicada -->
+                                    {% set ns = namespace(ja_indicado=false) %}
+                                    {% for item in indicados[cat.id] %}
+                                        {% if item.person.id == p.id %}
+                                            {% set ns.ja_indicado = true %}
+                                        {% endif %}
                                     {% endfor %}
-                                </select>
+
+                                    {% if ns.ja_indicado %}
+                                    <!-- PESSOA JÁ INDICADA (Desativada e Cinza) -->
+                                    <div class="flex items-center justify-between gap-4 bg-white/5 p-4 rounded-2xl opacity-50 border border-white/5 cursor-not-allowed">
+                                        <div class="flex items-center gap-3 flex-1">
+                                            {% if p.photo_url %}
+                                                <img src="{{ p.photo_url }}" class="w-8 h-8 rounded-full object-cover border border-white/10 grayscale">
+                                            {% else %}
+                                                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs text-white grayscale">{{ p.name[0] | upper }}</div>
+                                            {% endif %}
+                                            <span class="font-medium text-gray-400">{{ p.name }}</span>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-1 rounded-md">Na disputa</span>
+                                    </div>
+
+                                    {% else %}
+                                    <!-- PESSOA DISPONÍVEL (Múltipla Seleção) -->
+                                    <label class="flex items-center justify-between gap-4 bg-white/5 p-4 rounded-2xl cursor-pointer hover:bg-white/10 border border-white/5 transition-all group">
+                                        <div class="flex items-center gap-3 flex-1">
+                                            {% if p.photo_url %}
+                                                <img src="{{ p.photo_url }}" class="w-8 h-8 rounded-full object-cover border border-white/10">
+                                            {% else %}
+                                                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs text-white">{{ p.name[0] | upper }}</div>
+                                            {% endif %}
+                                            <span class="font-medium text-gray-200 group-hover:text-white transition-colors">{{ p.name }}</span>
+                                        </div>
+
+                                        <!-- Checkbox Animado -->
+                                        <div class="relative w-6 h-6 flex-shrink-0">
+                                            <input type="checkbox" name="person_id" value="{{ p.id }}" class="peer absolute opacity-0 w-full h-full cursor-pointer z-10">
+                                            <div class="w-6 h-6 rounded-full border-2 border-white/20 peer-hover:border-emerald-500/50 transition-all duration-200"></div>
+                                            <div class="absolute inset-1 bg-emerald-500 rounded-full scale-0 peer-checked:scale-100 transition-transform duration-200 ease-out flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.5)]">
+                                                <svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    {% endif %}
+
+                                    {% else %}
+                                    <div class="text-center py-6 border border-dashed border-white/10 rounded-2xl bg-white/5">
+                                        <p class="text-gray-500 italic text-sm">Nenhuma pessoa cadastrada no sistema.</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
                                 <div class="flex gap-4 justify-end mt-6">
                                     <button type="button" onclick="document.getElementById('modal-add-{{ cat.id }}').close()" class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-medium transition-all">Cancelar</button>
-                                    <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Confirmar</button>
+                                    <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Confirmar Seleção</button>
                                 </div>
                             </form>
                         </div>
                     </dialog>
 
+                    <!-- MODAL DE EDITAR CATEGORIA -->
                     <dialog id="modal-edit-{{ cat.id }}" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
                         <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[420px]">
                             <h3 class="text-2xl font-bold mb-6 text-white">Editar Categoria</h3>
@@ -174,6 +226,7 @@
         </main>
     </div>
 
+    <!-- MODAL DE CONFIGURAÇÕES DE TEMPO -->
     <dialog id="modal-config-tempo" class="bg-transparent p-0 m-auto backdrop:bg-black/80 backdrop:backdrop-blur-sm transition-all">
         <div class="bg-[#0b0b10]/95 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[500px]">
             <h3 class="text-2xl font-bold mb-2 text-white">Configurar Cronograma</h3>
@@ -216,6 +269,7 @@
         </div>
     </dialog>
 
+    <!-- MODAL DE IMPORTAR DA BIBLIOTECA -->
     <dialog id="modal-importar" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
         <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[500px]">
             <h3 class="text-2xl font-bold mb-6 text-white">Importar da Biblioteca</h3>
@@ -249,6 +303,7 @@
         </div>
     </dialog>
 
+    <!-- MODAL DE CRIAR NOVA CATEGORIA (ZERO) -->
     <dialog id="modal-criar-zero" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
         <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[420px]">
             <h3 class="text-2xl font-bold mb-6 text-white">Nova Categoria</h3>
