@@ -3,7 +3,7 @@ import cloudinary
 import cloudinary.uploader
 from functools import wraps
 from flask import Blueprint, render_template, session, redirect, url_for, abort, request
-from ..models import Person, Edition, CategoryTemplate, EditionCategory, Nomination, db
+from ..models import Person, Edition, CategoryTemplate, EditionCategory, Nomination, Vote, StoryProgress, db
 from datetime import datetime
 
 # --- Configuração do Cloudinary ---
@@ -104,8 +104,21 @@ def editar_pessoa(pessoa_id):
 @admin_bp.route("/pessoas/excluir/<int:pessoa_id>", methods=["POST"])
 @admin_required
 def excluir_pessoa(pessoa_id):
-    db.session.delete(Person.query.get_or_404(pessoa_id))
+    p = Person.query.get_or_404(pessoa_id)
+
+    # 1. Apaga todos os votos que a pessoa deu ou recebeu
+    Vote.query.filter((Vote.voter_id == pessoa_id) | (Vote.nominee_id == pessoa_id)).delete()
+
+    # 2. Apaga todas as indicações dessa pessoa nas categorias
+    Nomination.query.filter_by(person_id=pessoa_id).delete()
+
+    # 3. Apaga o progresso da cerimônia (caso ela tenha)
+    StoryProgress.query.filter_by(person_id=pessoa_id).delete()
+
+    # 4. Agora sim, com tudo limpo, apaga a pessoa
+    db.session.delete(p)
     db.session.commit()
+
     return redirect(url_for('admin.pessoas'))
 
 
