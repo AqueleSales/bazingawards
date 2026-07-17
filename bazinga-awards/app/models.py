@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -34,13 +33,20 @@ class Person(db.Model):
 class Edition(db.Model):
     """Uma temporada (2026, 2027...). O estado controla o que o admin
     pode fazer e o que os usuários enxergam."""
+    __tablename__ = 'edition'
 
-    # announced -> setup -> voting -> blackout -> revealing -> archived
     id = db.Column(db.Integer, primary_key=True)
     year = db.Column(db.Integer, unique=True, nullable=False)
-    state = db.Column(db.String(20), default="announced", nullable=False)
-    premiere_at = db.Column(db.DateTime)  # data/hora marcada pro admin
+
+    # Controle de Estado e Tempo para o Story Mode / GOTY
+    state = db.Column(db.String(20), default='ANNOUNCED')  # ANNOUNCED, VOTING, CLOSED, REVEALING, FINISHED
+    voting_start = db.Column(db.DateTime, nullable=True)
+    voting_end = db.Column(db.DateTime, nullable=True)
+    presentation_date = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relação em cascata (se apagar a edição, apaga as categorias dela)
+    edition_categories = db.relationship('EditionCategory', backref='edition', cascade='all, delete-orphan', lazy=True)
 
     def __repr__(self):
         return f"<Edition {self.year} {self.state}>"

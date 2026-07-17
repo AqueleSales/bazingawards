@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Bazinga {{ edicao.year }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #0b0b10; background-image: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 40%), radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 0%, transparent 40%); background-attachment: fixed; }
+        .font-bazinga { font-family: 'Bangers', cursive; letter-spacing: 3px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; } .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen p-4 md:p-8 flex items-center justify-center relative overflow-hidden">
+
+    <div class="w-full max-w-7xl h-[90vh] flex flex-col md:flex-row gap-6 relative z-10">
+
+        <aside class="w-full md:w-72 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-8 pb-4">
+                <h2 class="text-5xl font-bazinga text-[#FFD700] drop-shadow-[0_0_15px_rgba(255,215,0,0.6)] uppercase">Bazinga</h2>
+            </div>
+            <nav class="flex-1 px-6 space-y-3 mt-4">
+                <a href="{{ url_for('admin.dashboard') }}" class="block px-5 py-3 hover:bg-white/5 rounded-2xl text-gray-400 hover:text-emerald-300 transition-all">Dashboard</a>
+                <a href="{{ url_for('admin.pessoas') }}" class="block px-5 py-3 hover:bg-white/5 rounded-2xl text-gray-400 hover:text-emerald-300 transition-all">Pessoas (Cadastros)</a>
+                <a href="{{ url_for('admin.templates_list') }}" class="block px-5 py-3 hover:bg-white/5 rounded-2xl text-gray-400 hover:text-emerald-300 transition-all">Biblioteca de Categorias</a>
+                <a href="{{ url_for('admin.temporadas') }}" class="block px-5 py-3 bg-white/10 border border-emerald-500/30 rounded-2xl text-white font-medium shadow-inner">Temporadas</a>
+            </nav>
+            <div class="p-6 border-t border-white/10 mt-auto bg-black/20 space-y-2">
+                <a href="/" class="text-sm text-gray-400 hover:text-white flex items-center gap-2 transition-colors"><span>&larr;</span> Voltar ao Site</a>
+                <a href="{{ url_for('auth.logout') }}" class="text-sm text-red-400 hover:text-red-300 flex items-center gap-2 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    Sair do Sistema
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex-1 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl flex flex-col overflow-hidden relative">
+            <header class="p-8 pb-6 flex justify-between items-center z-10 border-b border-white/10">
+                <div>
+                    <h1 class="text-5xl font-bazinga text-white tracking-wider mb-2 drop-shadow-md">Awards {{ edicao.year }}</h1>
+                    <p class="text-gray-400 text-sm uppercase tracking-widest">Status: <span class="text-emerald-400 font-bold">{{ edicao.state }}</span></p>
+                </div>
+                <div class="flex items-center gap-4 bg-white/5 px-4 py-2 rounded-full border border-white/10 backdrop-blur-md">
+                    <span class="text-sm font-medium text-gray-300 hidden md:block">{{ admin_user.name }}</span>
+                    {% if admin_user.photo_url %}
+                        <img src="{{ admin_user.photo_url }}" class="w-10 h-10 rounded-full border-2 border-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)] object-cover">
+                    {% else %}
+                        <div class="w-10 h-10 rounded-full bg-emerald-900 border-2 border-emerald-500 flex items-center justify-center font-bold">{{ admin_user.name[0] | upper }}</div>
+                    {% endif %}
+                </div>
+            </header>
+
+            <div class="p-8 overflow-y-auto no-scrollbar flex-1">
+
+                <div class="bg-black/20 backdrop-blur-md border border-white/10 rounded-[2rem] p-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-inner">
+                    <div>
+                        <h2 class="text-xl font-bold text-white mb-3">Cronograma da Premiação</h2>
+                        <div class="flex flex-wrap gap-x-8 gap-y-2 text-sm text-gray-400">
+                            <p class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span> Votação Abre:
+                                <span class="text-gray-200 font-medium">{% if edicao.voting_start %}{{ edicao.voting_start.strftime('%d/%m/%Y às %H:%M') }}{% else %}Não definido{% endif %}</span>
+                            </p>
+                            <p class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></span> Votação Fecha:
+                                <span class="text-gray-200 font-medium">{% if edicao.voting_end %}{{ edicao.voting_end.strftime('%d/%m/%Y às %H:%M') }}{% else %}Não definido{% endif %}</span>
+                            </p>
+                            <p class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#FFD700] shadow-[0_0_8px_#FFD700]"></span> Cerimônia (Story):
+                                <span class="text-[#FFD700] font-bold">{% if edicao.presentation_date %}{{ edicao.presentation_date.strftime('%d/%m/%Y às %H:%M') }}{% else %}Não definido{% endif %}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="document.getElementById('modal-config-tempo').showModal()" class="bg-white/5 hover:bg-white/10 text-white px-5 py-3 rounded-xl font-medium border border-white/10 transition-all whitespace-nowrap">
+                        <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Ajustar Cronograma
+                    </button>
+                </div>
+
+                <div class="flex gap-4 mb-8">
+                    <button onclick="document.getElementById('modal-importar').showModal()" class="bg-emerald-500 hover:bg-emerald-400 text-black px-6 py-3 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:scale-105">+ Importar da Biblioteca</button>
+                    <button onclick="document.getElementById('modal-criar-zero').showModal()" class="bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl font-medium border border-white/10 transition-all">Criar Categoria Zero</button>
+                </div>
+
+                <div class="space-y-4">
+                    {% for cat in categorias %}
+                    <div class="bg-black/20 backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden transition-all group">
+
+                        <div class="p-6 flex justify-between items-center cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleCategory('cat-{{ cat.id }}')">
+                            <div class="flex-1">
+                                <h3 class="text-2xl font-bold text-white flex items-center gap-3">
+                                    <span id="icon-cat-{{ cat.id }}" class="text-emerald-500 font-bold w-6 text-center text-xl">-</span>
+                                    {{ cat.name }}
+                                </h3>
+                                <p class="text-sm text-gray-400 mt-1 ml-9">{{ cat.description }}</p>
+                            </div>
+
+                            <div class="flex gap-2 opacity-50 group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
+
+                                <form action="{{ url_for('admin.duplicar_categoria', cat_id=cat.id) }}" method="POST" class="inline">
+                                    <button type="submit" class="p-2 bg-white/5 hover:bg-blue-500/20 text-gray-400 hover:text-blue-400 rounded-lg transition-all" title="Duplicar Categoria e Indicados">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    </button>
+                                </form>
+
+                                <button onclick="document.getElementById('modal-edit-{{ cat.id }}').showModal()" class="p-2 bg-white/5 hover:bg-emerald-500/20 text-gray-400 hover:text-emerald-400 rounded-lg transition-all" title="Editar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                                <form action="{{ url_for('admin.excluir_categoria', cat_id=cat.id) }}" method="POST" class="inline">
+                                    <button type="submit" class="p-2 bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-lg transition-all" title="Excluir Direto">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div id="content-cat-{{ cat.id }}" class="px-6 pb-6 pt-2 border-t border-white/5 ml-9">
+                            <div class="flex flex-wrap gap-3 mt-2 items-center">
+                                {% for item in indicados[cat.id] %}
+                                <div class="bg-white/10 border border-white/20 rounded-full pl-2 pr-3 py-1 flex items-center gap-2">
+                                    {% if item.person.photo_url %}
+                                        <img src="{{ item.person.photo_url }}" class="w-6 h-6 rounded-full object-cover border border-white/20">
+                                    {% else %}
+                                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-bold text-[10px]">{{ item.person.name[0] | upper }}</div>
+                                    {% endif %}
+                                    <span class="text-sm font-medium text-gray-200">{{ item.person.name }}</span>
+
+                                    <form action="{{ url_for('admin.excluir_indicado', nom_id=item.nom_id) }}" method="POST" class="flex items-center ml-1">
+                                        <button type="submit" class="text-red-400 hover:text-red-300 font-bold text-lg leading-none transition-colors" title="Remover Indicado">&times;</button>
+                                    </form>
+                                </div>
+                                {% else %}
+                                <p class="text-gray-500 text-sm italic py-1.5">Ninguém concorrendo ainda.</p>
+                                {% endfor %}
+
+                                <button onclick="document.getElementById('modal-add-{{ cat.id }}').showModal()" class="text-xs font-bold uppercase tracking-wider bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-4 py-1.5 rounded-full transition-all">
+                                    + Adicionar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NOVO MODAL DE INDICAR (MÚLTIPLA SELEÇÃO + JÁ INDICADOS) -->
+                    <dialog id="modal-add-{{ cat.id }}" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
+                        <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[450px]">
+                            <h3 class="text-2xl font-bold mb-6 text-white">Indicar para {{ cat.name }}</h3>
+                            <form action="{{ url_for('admin.adicionar_indicado', cat_id=cat.id) }}" method="POST">
+
+                                <div class="space-y-3 mb-8 max-h-60 overflow-y-auto pr-2 no-scrollbar">
+                                    {% for p in all_people %}
+
+                                    <!-- Lógica Jinja para verificar se a pessoa já está indicada -->
+                                    {% set ns = namespace(ja_indicado=false) %}
+                                    {% for item in indicados[cat.id] %}
+                                        {% if item.person.id == p.id %}
+                                            {% set ns.ja_indicado = true %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if ns.ja_indicado %}
+                                    <!-- PESSOA JÁ INDICADA (Desativada e Cinza) -->
+                                    <div class="flex items-center justify-between gap-4 bg-white/5 p-4 rounded-2xl opacity-50 border border-white/5 cursor-not-allowed">
+                                        <div class="flex items-center gap-3 flex-1">
+                                            {% if p.photo_url %}
+                                                <img src="{{ p.photo_url }}" class="w-8 h-8 rounded-full object-cover border border-white/10 grayscale">
+                                            {% else %}
+                                                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs text-white grayscale">{{ p.name[0] | upper }}</div>
+                                            {% endif %}
+                                            <span class="font-medium text-gray-400">{{ p.name }}</span>
+                                        </div>
+                                        <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest bg-emerald-500/10 px-2 py-1 rounded-md">Na disputa</span>
+                                    </div>
+
+                                    {% else %}
+                                    <!-- PESSOA DISPONÍVEL (Múltipla Seleção) -->
+                                    <label class="flex items-center justify-between gap-4 bg-white/5 p-4 rounded-2xl cursor-pointer hover:bg-white/10 border border-white/5 transition-all group">
+                                        <div class="flex items-center gap-3 flex-1">
+                                            {% if p.photo_url %}
+                                                <img src="{{ p.photo_url }}" class="w-8 h-8 rounded-full object-cover border border-white/10">
+                                            {% else %}
+                                                <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-xs text-white">{{ p.name[0] | upper }}</div>
+                                            {% endif %}
+                                            <span class="font-medium text-gray-200 group-hover:text-white transition-colors">{{ p.name }}</span>
+                                        </div>
+
+                                        <!-- Checkbox Animado -->
+                                        <div class="relative w-6 h-6 flex-shrink-0">
+                                            <input type="checkbox" name="person_id" value="{{ p.id }}" class="peer absolute opacity-0 w-full h-full cursor-pointer z-10">
+                                            <div class="w-6 h-6 rounded-full border-2 border-white/20 peer-hover:border-emerald-500/50 transition-all duration-200"></div>
+                                            <div class="absolute inset-1 bg-emerald-500 rounded-full scale-0 peer-checked:scale-100 transition-transform duration-200 ease-out flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.5)]">
+                                                <svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                            </div>
+                                        </div>
+                                    </label>
+                                    {% endif %}
+
+                                    {% else %}
+                                    <div class="text-center py-6 border border-dashed border-white/10 rounded-2xl bg-white/5">
+                                        <p class="text-gray-500 italic text-sm">Nenhuma pessoa cadastrada no sistema.</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="flex gap-4 justify-end mt-6">
+                                    <button type="button" onclick="document.getElementById('modal-add-{{ cat.id }}').close()" class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-medium transition-all">Cancelar</button>
+                                    <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Confirmar Seleção</button>
+                                </div>
+                            </form>
+                        </div>
+                    </dialog>
+
+                    <!-- MODAL DE EDITAR CATEGORIA -->
+                    <dialog id="modal-edit-{{ cat.id }}" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
+                        <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[420px]">
+                            <h3 class="text-2xl font-bold mb-6 text-white">Editar Categoria</h3>
+                            <form action="{{ url_for('admin.editar_categoria', cat_id=cat.id) }}" method="POST" class="space-y-4">
+                                <input type="text" name="nome" value="{{ cat.name }}" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-all">
+                                <textarea name="descricao" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-all">{{ cat.description }}</textarea>
+                                <div class="flex gap-4 justify-end mt-6">
+                                    <button type="button" onclick="document.getElementById('modal-edit-{{ cat.id }}').close()" class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-medium transition-all">Cancelar</button>
+                                    <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Salvar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </dialog>
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL DE CONFIGURAÇÕES DE TEMPO -->
+    <dialog id="modal-config-tempo" class="bg-transparent p-0 m-auto backdrop:bg-black/80 backdrop:backdrop-blur-sm transition-all">
+        <div class="bg-[#0b0b10]/95 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[500px]">
+            <h3 class="text-2xl font-bold mb-2 text-white">Configurar Cronograma</h3>
+            <p class="text-gray-400 text-sm mb-6">Defina as datas para automatizar o bloqueio do site e a cerimônia.</p>
+
+            <form action="{{ url_for('admin.configurar_temporada', edition_id=edicao.id) }}" method="POST" class="space-y-5">
+
+                <div>
+                    <label class="block text-sm font-medium text-emerald-400 mb-1">Status Atual Forçado</label>
+                    <select name="state" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 cursor-pointer">
+                        <option value="ANNOUNCED" class="bg-[#0b0b10]" {% if edicao.state == 'ANNOUNCED' %}selected{% endif %}>Anunciado (Aguardando)</option>
+                        <option value="VOTING" class="bg-[#0b0b10]" {% if edicao.state == 'VOTING' %}selected{% endif %}>Votação Aberta</option>
+                        <option value="CLOSED" class="bg-[#0b0b10]" {% if edicao.state == 'CLOSED' %}selected{% endif %}>Votação Encerrada (Lockdown)</option>
+                        <option value="REVEALING" class="bg-[#0b0b10]" {% if edicao.state == 'REVEALING' %}selected{% endif %}>Cerimônia (Ao Vivo/Story Mode)</option>
+                        <option value="FINISHED" class="bg-[#0b0b10]" {% if edicao.state == 'FINISHED' %}selected{% endif %}>Finalizado (Resultados Públicos)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Início da Votação</label>
+                        <input type="datetime-local" name="voting_start" value="{{ edicao.voting_start.strftime('%Y-%m-%dT%H:%M') if edicao.voting_start else '' }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-emerald-500/50 [color-scheme:dark]">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-400 mb-1">Fim da Votação</label>
+                        <input type="datetime-local" name="voting_end" value="{{ edicao.voting_end.strftime('%Y-%m-%dT%H:%M') if edicao.voting_end else '' }}" class="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-white focus:border-emerald-500/50 [color-scheme:dark]">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-[#FFD700] mb-1">Data da Cerimônia (Story Mode)</label>
+                    <input type="datetime-local" name="presentation_date" value="{{ edicao.presentation_date.strftime('%Y-%m-%dT%H:%M') if edicao.presentation_date else '' }}" class="w-full bg-[#FFD700]/10 border border-[#FFD700]/30 rounded-xl px-4 py-3 text-[#FFD700] focus:outline-none focus:border-[#FFD700] [color-scheme:dark]">
+                </div>
+
+                <div class="flex gap-4 justify-end mt-8">
+                    <button type="button" onclick="document.getElementById('modal-config-tempo').close()" class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-medium transition-all">Cancelar</button>
+                    <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Salvar Cronograma</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <!-- MODAL DE IMPORTAR DA BIBLIOTECA -->
+    <dialog id="modal-importar" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
+        <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[500px]">
+            <h3 class="text-2xl font-bold mb-6 text-white">Importar da Biblioteca</h3>
+            <form action="{{ url_for('admin.importar_categorias', edition_id=edicao.id) }}" method="POST">
+                <div class="space-y-3 mb-8 max-h-60 overflow-y-auto pr-2 no-scrollbar">
+                    {% for temp in all_templates %}
+                    <label class="flex items-center justify-between gap-4 bg-white/5 p-4 rounded-2xl cursor-pointer hover:bg-white/10 border border-white/5 transition-all group">
+                        <div class="flex-1">
+                            <span class="font-medium text-gray-200 group-hover:text-white transition-colors">{{ temp.name }}</span>
+                            {% if temp.description %}<p class="text-xs text-gray-500 truncate max-w-[300px]">{{ temp.description }}</p>{% endif %}
+                        </div>
+                        <div class="relative w-6 h-6 flex-shrink-0">
+                            <input type="checkbox" name="template_ids" value="{{ temp.id }}" class="peer absolute opacity-0 w-full h-full cursor-pointer z-10">
+                            <div class="w-6 h-6 rounded-full border-2 border-white/20 peer-hover:border-emerald-500/50 transition-all duration-200"></div>
+                            <div class="absolute inset-1 bg-emerald-500 rounded-full scale-0 peer-checked:scale-100 transition-transform duration-200 ease-out flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.5)]">
+                                <svg class="w-3 h-3 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                        </div>
+                    </label>
+                    {% else %}
+                    <div class="text-center py-6 border border-dashed border-white/10 rounded-2xl bg-white/5">
+                        <p class="text-gray-500 italic text-sm">Sua biblioteca de templates está vazia.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="flex gap-4 justify-end mt-6">
+                    <button type="button" onclick="document.getElementById('modal-importar').close()" class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-medium transition-all">Cancelar</button>
+                    <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Importar Selecionados</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <!-- MODAL DE CRIAR NOVA CATEGORIA (ZERO) -->
+    <dialog id="modal-criar-zero" class="bg-transparent p-0 m-auto backdrop:bg-black/70 backdrop:backdrop-blur-sm transition-all">
+        <div class="bg-[#0b0b10]/90 backdrop-blur-3xl border border-emerald-500/30 p-10 rounded-[2.5rem] text-white shadow-[0_0_50px_rgba(16,185,129,0.2)] w-[90vw] max-w-[420px]">
+            <h3 class="text-2xl font-bold mb-6 text-white">Nova Categoria</h3>
+            <form action="{{ url_for('admin.criar_categoria_zero', edition_id=edicao.id) }}" method="POST" class="space-y-4">
+                <input type="text" name="nome" required placeholder="Nome da categoria" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-all">
+                <textarea name="descricao" placeholder="Descrição (Opcional)" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-emerald-500/50 transition-all"></textarea>
+                <div class="flex gap-4 justify-end mt-6">
+                    <button type="button" onclick="document.getElementById('modal-criar-zero').close()" class="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-medium transition-all">Cancelar</button>
+                    <button type="submit" class="px-6 py-3 rounded-xl bg-emerald-500 text-black hover:bg-emerald-400 font-bold shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all">Criar</button>
+                </div>
+            </form>
+        </div>
+    </dialog>
+
+    <script>
+        function toggleCategory(id) {
+            const content = document.getElementById('content-' + id);
+            const icon = document.getElementById('icon-' + id);
+            content.classList.toggle('hidden');
+            icon.textContent = content.classList.contains('hidden') ? '+' : '-';
+        }
+    </script>
+</body>
+</html>

@@ -2,20 +2,26 @@ from flask import Flask
 
 from .auth import auth_bp, oauth
 from .config import Config
-from .main import main_bp
+from .admin.routes import admin_bp  # <-- Importando as rotas do admin
 from .models import db
-
+from .main.routes import main_bp
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     db.init_app(app)
     oauth.init_app(app)
     _register_oauth_providers(app)
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
+    from .main.routes import main_bp
     app.register_blueprint(main_bp)
+    # <-- Registrando o painel admin no Flask
+
 
     with app.app_context():
         db.create_all()
