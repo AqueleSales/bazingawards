@@ -3,6 +3,7 @@
 {% block content %}
 <style>
 <<<<<<< HEAD
+<<<<<<< HEAD
   /* --- ESTILOS DE GALA (THE GAME AWARDS VIBE) --- */
 
   /* Header Fixo no Topo para Usuários Logados */
@@ -251,6 +252,8 @@
     transform: scale(1.2);
   }
 =======
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
   /* ========================================= */
   /* ESTILOS ORIGINAIS DO TELÃO E BASE         */
   /* ========================================= */
@@ -350,6 +353,9 @@
   .trophy-total-box { background: rgba(250, 204, 21, 0.05); border-top: 1px solid rgba(255,255,255,0.05); margin: 0 -20px -20px -20px; padding: 15px 20px; border-radius: 0 0 12px 12px; display: flex; justify-content: space-between; align-items: center; }
   .trophy-total-label { font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 800; color: #dbdee1; text-transform: uppercase; letter-spacing: 1px; }
   .trophy-total-value { font-family: 'Inter', sans-serif; font-size: 1.3rem; font-weight: 900; color: #facc15; text-shadow: 0 0 10px rgba(250, 204, 21, 0.3); }
+<<<<<<< HEAD
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
+=======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
 
   .logout-btn-top { background: transparent; border: none; color: #80848e; cursor: pointer; transition: color 0.2s; padding: 4px; display: flex; align-items: center; text-decoration: none; }
@@ -364,6 +370,7 @@
 
   {% if user %}
   <header class="gala-header">
+<<<<<<< HEAD
 <<<<<<< HEAD
     <div class="gala-profile">
       {% if user.photo_url %}
@@ -387,6 +394,8 @@
       {% else %}
         <div style="width: 100px;"></div> {% endif %}
 =======
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
 
     <!-- Perfil Popout (Substituição Limpa) -->
     <div class="profile-wrapper">
@@ -467,11 +476,15 @@
         {% else %}
             <div style="width: 100px;"></div>
         {% endif %}
+<<<<<<< HEAD
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
+=======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
     </div>
   </header>
   {% endif %}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 
   <main class="stage-content" style="{% if user %}padding-top: 5rem;{% endif %}">
@@ -479,12 +492,17 @@
     {% if not user %}
       <h1 class="wordmark" style="font-size: 5rem; margin-bottom: 1.5rem;">Bazinga Awards</h1>
 =======
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
   <main class="stage-content" style="{% if user %}padding-top: 5rem;{% endif %}">
 
     {% if not user %}
       <h1 class="wordmark" style="font-size: 5.5rem; margin-bottom: 0;">Bazinga Awards</h1>
       {% if edicao %}<h3 style="font-family: 'Inter', sans-serif; color: #facc15; font-size: 1.2rem; letter-spacing: 4px; margin-bottom: 2rem; text-transform: uppercase;">Temporada {{ edicao.year }}</h3>{% endif %}
 
+<<<<<<< HEAD
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
+=======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
       <p class="tagline">A premiação oficial do servidor. Vote, discuta, dispute o troféu.</p>
 
@@ -495,6 +513,7 @@
 
     {% else %}
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       {% if status_real == 'ANNOUNCED' %}
         <div style="margin-top: 10rem;">
@@ -512,6 +531,8 @@
           {% if edicao.presentation_date %}
             <p class="tagline" style="color: #facc15; font-weight: 600; margin-top: 1.5rem;">Cerimônia Oficial: {{ edicao.presentation_date.strftime('%d/%m/%Y às %H:%M') }}</p>
 =======
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
       {% if status_real == 'NO_EDITION' %}
         <div style="margin-top: 10rem;">
           <h2 class="wordmark" style="font-size: 4rem; color: #facc15;">Aguarde...</h2>
@@ -533,6 +554,9 @@
               <p style="font-family: 'Inter', sans-serif; color: #aaa; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.5rem;">{{ evento_timer }}</p>
               <p id="timer-countdown" style="font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; color: #facc15; font-weight: bold; margin: 0;">--h --m --s</p>
           </div>
+<<<<<<< HEAD
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
+=======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
           {% endif %}
         </div>
@@ -543,8 +567,11 @@
           <p class="tagline">A revelação dos vencedores já está disponível.</p>
           <div class="login-row" style="margin-top: 3rem;">
 <<<<<<< HEAD
+<<<<<<< HEAD
             <a class="btn" style="background-color: #facc15; color: #000; text-decoration: none;" href="#">Iniciar Cerimônia</a>
 =======
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
             <a class="btn" style="background-color: #facc15; color: #000; text-decoration: none;" href="{{ url_for('main.cerimonia') }}">Iniciar Cerimônia</a>
           </div>
         </div>
@@ -555,6 +582,9 @@
           <p class="tagline">Esta edição foi arquivada na linha do tempo.</p>
           <div class="login-row" style="margin-top: 3rem;">
             <a class="btn" style="background-color: transparent; border: 1px solid #666; color: #fff; text-decoration: none;" href="{{ url_for('main.resultados_temporada', year=edicao.year) }}">Ver Resultados Finais</a>
+<<<<<<< HEAD
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
+=======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
           </div>
         </div>
@@ -562,11 +592,14 @@
       {% elif status_real == 'VOTING' %}
         <div class="telao-container">
 <<<<<<< HEAD
+<<<<<<< HEAD
 
             {% for cat in categorias %}
             <div class="slide {% if loop.first %}active{% endif %}" id="slide-{{ loop.index0 }}">
 
 =======
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
             {% if next_date %}
             <div style="text-align: right; padding-right: 1rem; margin-bottom: -1rem;">
                 <span style="font-family: 'Inter', sans-serif; font-size: 0.8rem; color: #10b981;">Encerra em: </span>
@@ -576,19 +609,26 @@
 
             {% for cat in categorias %}
             <div class="slide {% if loop.first %}active{% endif %}">
+<<<<<<< HEAD
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
+=======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
                 <div class="telao-header">
                   <h2 class="category-title">{{ cat.name }}</h2>
                   <p class="category-desc">{{ cat.description }}</p>
                 </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
 =======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
                 <div class="nominees-scroll-area">
                   <div class="nominees-grid">
                       {% for pessoa in indicados[cat.id] %}
                       {% set is_voted = (meus_votos.get(cat.id) == pessoa.id) %}
+<<<<<<< HEAD
 <<<<<<< HEAD
 
                       <div onclick="registrarVoto({{ cat.id }}, {{ pessoa.id }}, this)" class="nominee-card {% if is_voted %}selecionado{% endif %}">
@@ -606,6 +646,8 @@
                       {% else %}
                       <p style="color: rgba(255,255,255,0.4); font-family: 'Inter', sans-serif; font-style: italic;">Lista de indicados em segredo.</p>
 =======
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
                       <div onclick="registrarVoto({{ cat.id }}, {{ pessoa.id }}, this)" class="nominee-card {% if is_voted %}selecionado{% endif %}">
                           <div class="nominee-img-wrap">
                               {% if pessoa.photo_url %}<img src="{{ pessoa.photo_url }}" class="nominee-img">
@@ -613,6 +655,9 @@
                           </div>
                           <span class="nominee-name">{{ pessoa.name }}</span>
                       </div>
+<<<<<<< HEAD
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
+=======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
                       {% endfor %}
                   </div>
@@ -622,6 +667,7 @@
 
             <div class="telao-controls">
                 <button class="nav-btn" id="btn-prev" onclick="mudarSlide(-1)">Anterior</button>
+<<<<<<< HEAD
 <<<<<<< HEAD
 
                 <div class="progress-dots">
@@ -693,6 +739,8 @@
                 })
                 .catch(error => console.error('Erro de conexão:', error));
 =======
+=======
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
                 <div class="progress-dots">
                     {% for cat in categorias %}<div class="dot {% if loop.first %}active{% endif %}" onclick="irParaSlide({{ loop.index0 }})"></div>{% endfor %}
                 </div>
@@ -717,6 +765,9 @@
                 card.closest('.nominees-grid').querySelectorAll('.nominee-card').forEach(c => c.classList.remove('selecionado'));
                 card.classList.add('selecionado');
                 fetch('/votar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ categoria_id: catId, nominee_id: nomId }) });
+<<<<<<< HEAD
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
+=======
 >>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
             }
         </script>

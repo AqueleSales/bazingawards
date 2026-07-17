@@ -1,15 +1,18 @@
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .auth import auth_bp, oauth
 from .config import Config
-from .admin.routes import admin_bp  # <-- Importando as rotas do admin
 from .models import db
 from .main.routes import main_bp
-from werkzeug.middleware.proxy_fix import ProxyFix
+from .admin.routes import admin_bp
+
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
+
+    # Corrige o problema do HTTPS no Railway
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
     db.init_app(app)
@@ -17,11 +20,8 @@ def create_app(config_class=Config):
     _register_oauth_providers(app)
 
     app.register_blueprint(auth_bp)
-    app.register_blueprint(admin_bp)
-    from .main.routes import main_bp
     app.register_blueprint(main_bp)
-    # <-- Registrando o painel admin no Flask
-
+    app.register_blueprint(admin_bp)
 
     with app.app_context():
         db.create_all()
@@ -30,9 +30,6 @@ def create_app(config_class=Config):
 
 
 def _register_oauth_providers(app):
-    """Só registra um provedor se as credenciais dele existirem no .env.
-    Sem isso, /auth/login/<provider> avisa que falta configurar."""
-
     if app.config.get("GOOGLE_CLIENT_ID") and app.config.get("GOOGLE_CLIENT_SECRET"):
         oauth.register(
             name="google",

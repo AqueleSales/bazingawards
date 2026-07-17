@@ -4,7 +4,11 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
     </content>
+<<<<<<< HEAD
     <orderEntry type="jdk" jdkName="Python 3.14 (trabalho_teo)" jdkType="Python SDK" />
+=======
+    <orderEntry type="jdk" jdkName="Python 3.14 (bazingawards)" jdkType="Python SDK" />
+>>>>>>> 5418e4d8ce45d968f4dab7799db7aa4b545fc47e
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">
