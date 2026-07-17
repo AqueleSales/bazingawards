@@ -1,28 +1,33 @@
 import os
-import base64
-import uuid
+import cloudinary
+import cloudinary.uploader
 from functools import wraps
 from flask import Blueprint, render_template, session, redirect, url_for, abort, request
 from ..models import Person, Edition, CategoryTemplate, EditionCategory, Nomination, db
 from datetime import datetime
 
+# --- Configuração do Cloudinary ---
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
+
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+
 
 # --- Helpers e Utils ---
 def salvar_imagem_base64(b64_string):
-    if not b64_string or 'base64' not in b64_string: return None
+    if not b64_string or 'base64' not in b64_string:
+        return None
     try:
-        header, encoded = b64_string.split(",", 1)
-        ext = "png"
-        if "image/" in header: ext = header.split("image/")[1].split(";")[0]
-        filename = f"{uuid.uuid4().hex}.{ext}"
-        upload_folder = os.path.join('app', 'static', 'uploads')
-        os.makedirs(upload_folder, exist_ok=True)
-        file_path = os.path.join(upload_folder, filename)
-        with open(file_path, "wb") as fh:
-            fh.write(base64.b64decode(encoded))
-        return f"/static/uploads/{filename}"
-    except:
+        # Envia a foto do seu painel direto para os servidores do Cloudinary
+        upload_result = cloudinary.uploader.upload(b64_string)
+
+        # Pega a URL segura (https) que o Cloudinary gerou e salva no seu banco de dados
+        return upload_result.get("secure_url")
+    except Exception as e:
+        print(f"Erro ao subir para o Cloudinary: {e}")
         return None
 
 
@@ -46,6 +51,7 @@ def admin_required(f):
 
     return decorated_function
 
+
 # --- Rotas do Dashboard e Pessoas ---
 @admin_bp.route("/")
 @admin_required
@@ -54,6 +60,7 @@ def dashboard():
     return render_template("admin/dashboard.html", admin_user=person, pessoas_count=Person.query.count(),
                            templates_count=CategoryTemplate.query.count(),
                            edicoes=Edition.query.order_by(Edition.year.desc()).all())
+
 
 @admin_bp.route("/pessoas", methods=["GET", "POST"])
 @admin_required
@@ -82,6 +89,7 @@ def pessoas():
     return render_template("admin/pessoas.html", admin_user=Person.query.get(session["person_id"]), pessoas=todas,
                            participacoes=part)
 
+
 @admin_bp.route("/pessoas/editar/<int:pessoa_id>", methods=["POST"])
 @admin_required
 def editar_pessoa(pessoa_id):
@@ -92,12 +100,14 @@ def editar_pessoa(pessoa_id):
     db.session.commit()
     return redirect(url_for('admin.pessoas'))
 
+
 @admin_bp.route("/pessoas/excluir/<int:pessoa_id>", methods=["POST"])
 @admin_required
 def excluir_pessoa(pessoa_id):
     db.session.delete(Person.query.get_or_404(pessoa_id))
     db.session.commit()
     return redirect(url_for('admin.pessoas'))
+
 
 # --- Rotas de Templates (Biblioteca) ---
 @admin_bp.route("/templates", methods=["GET", "POST"])
@@ -110,6 +120,7 @@ def templates_list():
     return render_template("admin/templates_list.html", admin_user=Person.query.get(session["person_id"]),
                            templates=CategoryTemplate.query.order_by(CategoryTemplate.name).all())
 
+
 @admin_bp.route("/templates/editar/<int:template_id>", methods=["POST"])
 @admin_required
 def editar_template(template_id):
@@ -118,12 +129,14 @@ def editar_template(template_id):
     db.session.commit()
     return redirect(url_for('admin.templates_list'))
 
+
 @admin_bp.route("/templates/excluir/<int:template_id>", methods=["POST"])
 @admin_required
 def excluir_template(template_id):
     db.session.delete(CategoryTemplate.query.get_or_404(template_id))
     db.session.commit()
     return redirect(url_for('admin.templates_list'))
+
 
 # --- Rotas de Temporadas e Categorias ---
 @admin_bp.route("/temporadas", methods=["GET", "POST"])
@@ -139,6 +152,7 @@ def temporadas():
     return render_template("admin/temporadas.html", admin_user=Person.query.get(session["person_id"]),
                            edicoes=Edition.query.order_by(Edition.year.desc()).all())
 
+
 @admin_bp.route("/temporadas/excluir/<int:edition_id>", methods=["POST"])
 @admin_required
 def excluir_temporada(edition_id):
@@ -150,6 +164,7 @@ def excluir_temporada(edition_id):
     db.session.delete(edicao)
     db.session.commit()
     return redirect(url_for('admin.temporadas'))
+
 
 @admin_bp.route("/temporadas/<int:edition_id>")
 @admin_required
@@ -176,6 +191,7 @@ def edicao_painel(edition_id):
         indicados=indicados_dict
     )
 
+
 @admin_bp.route("/temporadas/<int:edition_id>/importar", methods=["POST"])
 @admin_required
 def importar_categorias(edition_id):
@@ -185,6 +201,7 @@ def importar_categorias(edition_id):
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=edition_id))
 
+
 @admin_bp.route("/temporadas/<int:edition_id>/criar-categoria", methods=["POST"])
 @admin_required
 def criar_categoria_zero(edition_id):
@@ -192,6 +209,7 @@ def criar_categoria_zero(edition_id):
                                    description=request.form.get("descricao")))
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=edition_id))
+
 
 @admin_bp.route("/categoria/<int:cat_id>/editar", methods=["POST"])
 @admin_required
@@ -201,6 +219,7 @@ def editar_categoria(cat_id):
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=cat.edition_id))
 
+
 @admin_bp.route("/categoria/<int:cat_id>/excluir", methods=["POST"])
 @admin_required
 def excluir_categoria(cat_id):
@@ -209,6 +228,7 @@ def excluir_categoria(cat_id):
     db.session.delete(cat)
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=cat.edition_id))
+
 
 @admin_bp.route("/categoria/<int:cat_id>/indicado/adicionar", methods=["POST"])
 @admin_required
@@ -226,6 +246,7 @@ def adicionar_indicado(cat_id):
 
     return redirect(url_for('admin.edicao_painel', edition_id=categoria.edition_id))
 
+
 @admin_bp.route("/indicado/<int:nom_id>/excluir", methods=["POST"])
 @admin_required
 def excluir_indicado(nom_id):
@@ -235,6 +256,7 @@ def excluir_indicado(nom_id):
     db.session.delete(nom)
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=eid))
+
 
 @admin_bp.route("/categoria/<int:cat_id>/duplicar", methods=["POST"])
 @admin_required
@@ -262,6 +284,7 @@ def duplicar_categoria(cat_id):
 
     db.session.commit()
     return redirect(url_for('admin.edicao_painel', edition_id=cat_original.edition_id))
+
 
 @admin_bp.route("/temporadas/<int:edition_id>/configurar", methods=["POST"])
 @admin_required
