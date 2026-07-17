@@ -1,6 +1,13 @@
+# Ambientes e Configurações
 .env
+.venv/
+venv/
+.idea/
+
+# Bancos de Dados
+*.db
+instance/
+
+# Cache do Python
 __pycache__/
 *.pyc
-instance/
-.venv/
-.idea/
