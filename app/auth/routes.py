@@ -1,3 +1,4 @@
+import requests
 from flask import current_app, redirect, session, url_for
 
 from ..models import Person, db
@@ -29,21 +30,26 @@ def callback(provider):
 
     token = client.authorize_access_token()
 
-    # --- A CORREÇÃO É AQUI ---
-    # Garante que o campo token_type exista e seja 'Bearer'
-    token['token_type'] = 'Bearer'
-    # -------------------------
-
     if provider == "google":
-        # Google geralmente funciona bem assim, mas se der erro no Google tbm,
-        # pode manter a linha acima antes desse if.
         userinfo = token.get("userinfo") or {}
         provider_id = str(userinfo["sub"])
         email = userinfo.get("email")
         name = userinfo.get("name") or email or "Sem nome"
         photo = userinfo.get("picture")
     else:  # discord
-        profile = client.get("users/@me", token=token).json()
+        # Não usa client.get(...) aqui: o Authlib 1.7.x quebra com
+        # UnsupportedTokenTypeError ao tentar remontar a auth Bearer
+        # sozinho pro Discord. Bypassa isso chamando a API direto com
+        # requests e montando o header na mão.
+        access_token = token["access_token"]
+        resp = requests.get(
+            "https://discord.com/api/users/@me",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        profile = resp.json()
+
         provider_id = str(profile["id"])
         email = profile.get("email")
         name = profile.get("global_name") or profile.get("username") or "Sem nome"
@@ -76,7 +82,6 @@ def callback(provider):
         person.is_admin = True
 
     db.session.commit()
-
     session["person_id"] = person.id
     return redirect(url_for("main.index"))
 
