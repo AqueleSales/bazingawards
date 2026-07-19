@@ -29,7 +29,14 @@ def callback(provider):
 
     token = client.authorize_access_token()
 
+    # --- A CORREÇÃO É AQUI ---
+    # Garante que o campo token_type exista e seja 'Bearer'
+    token['token_type'] = 'Bearer'
+    # -------------------------
+
     if provider == "google":
+        # Google geralmente funciona bem assim, mas se der erro no Google tbm,
+        # pode manter a linha acima antes desse if.
         userinfo = token.get("userinfo") or {}
         provider_id = str(userinfo["sub"])
         email = userinfo.get("email")
