@@ -28,29 +28,48 @@ def callback(provider):
     if client is None:
         return redirect(url_for("main.index"))
 
-    token = client.authorize_access_token()
+    # ARMADURA 1: Evita o Erro 500 se der MismatchingStateError (CSRF)
+    try:
+        token = client.authorize_access_token()
+    except Exception as e:
+        print(f"Erro ao autorizar token (possível F5 ou CSRF expirado): {e}")
+        return redirect(url_for("main.index"))
+
+    # Se o token voltar vazio por algum motivo de rede
+    if not token:
+        print("Token não recebido.")
+        return redirect(url_for("main.index"))
 
     if provider == "google":
         userinfo = token.get("userinfo") or {}
-        provider_id = str(userinfo["sub"])
+        provider_id = str(userinfo.get("sub", ""))
         email = userinfo.get("email")
         name = userinfo.get("name") or email or "Sem nome"
         photo = userinfo.get("picture")
+
     else:  # discord
-        # Não usa client.get(...) aqui: o Authlib 1.7.x quebra com
-        # UnsupportedTokenTypeError ao tentar remontar a auth Bearer
-        # sozinho pro Discord. Bypassa isso chamando a API direto com
-        # requests e montando o header na mão.
-        access_token = token["access_token"]
+        # ARMADURA 2: Evita o KeyError usando .get()
+        access_token = token.get("access_token")
+
+        if not access_token:
+            print(f"ERRO CRÍTICO - Token veio sem access_token. Payload: {token}")
+            return redirect(url_for("main.index"))
+
+        # Mantendo seu bypass com requests
         resp = requests.get(
             "https://discord.com/api/users/@me",
             headers={"Authorization": f"Bearer {access_token}"},
             timeout=10,
         )
-        resp.raise_for_status()
+
+        # ARMADURA 3: Evita quebrar se a API do Discord cair ou recusar o token
+        if not resp.ok:
+            print(f"Erro na API do Discord: {resp.status_code} - {resp.text}")
+            return redirect(url_for("main.index"))
+
         profile = resp.json()
 
-        provider_id = str(profile["id"])
+        provider_id = str(profile.get("id", ""))
         email = profile.get("email")
         name = profile.get("global_name") or profile.get("username") or "Sem nome"
         avatar = profile.get("avatar")
@@ -59,6 +78,11 @@ def callback(provider):
             if avatar
             else "https://cdn.discordapp.com/embed/avatars/0.png"
         )
+
+    # Prevenção extra: se não conseguiu o ID de jeito nenhum, aborta o login
+    if not provider_id:
+        print("Provedor não retornou um ID válido.")
+        return redirect(url_for("main.index"))
 
     person = Person.query.filter_by(auth_provider=provider, provider_user_id=provider_id).first()
 
@@ -76,8 +100,10 @@ def callback(provider):
     else:
         person.email = email or person.email
 
-    is_admin_email = bool(email) and email.lower() in current_app.config["ADMIN_EMAILS"]
-    is_admin_discord = provider == "discord" and provider_id in current_app.config["ADMIN_DISCORD_IDS"]
+    # ARMADURA 4: Usando .get() nas variáveis de ambiente caso elas não existam no .env
+    is_admin_email = bool(email) and email.lower() in current_app.config.get("ADMIN_EMAILS", [])
+    is_admin_discord = provider == "discord" and provider_id in current_app.config.get("ADMIN_DISCORD_IDS", [])
+
     if is_admin_email or is_admin_discord:
         person.is_admin = True
 
