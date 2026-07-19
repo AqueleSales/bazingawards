@@ -62,9 +62,6 @@ class CategoryTemplate(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relação em cascata: se apagar o template, apaga os indicados do template
-    template_nominees = db.relationship('TemplateNominee', backref='template', cascade='all, delete-orphan', lazy=True)
-
     def __repr__(self):
         return f"<CategoryTemplate {self.name!r}>"
 
@@ -89,11 +86,6 @@ class EditionCategory(db.Model):
     name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text)
     order_index = db.Column(db.Integer, default=0)
-
-    # RELAÇÕES EM CASCATA ADICIONADAS AQUI:
-    # Se apagar a categoria, apaga os indicados (nominations) e os votos (votes) automaticamente
-    nominations = db.relationship('Nomination', backref='category', cascade='all, delete-orphan', lazy=True)
-    votes = db.relationship('Vote', backref='category', cascade='all, delete-orphan', lazy=True)
 
     def __repr__(self):
         return f"<EditionCategory {self.name!r} edition={self.edition_id}>"
